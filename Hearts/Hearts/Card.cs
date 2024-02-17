@@ -1,7 +1,12 @@
 ﻿namespace Hearts;
 
-public record Card(Suit Suit, Rank Rank)
+internal record Card(Suit Suit, Rank Rank)
 {
-    public Suit Suit { get; } = Suit;
-    public Rank Rank { get; } = Rank;
+    internal Suit Suit { get; } = Suit;
+    internal Rank Rank { get; } = Rank;
+
+    public override string ToString()
+    {
+        return $"{Rank} of {Suit}";
+    }
 }

@@ -1,6 +1,6 @@
 ﻿namespace Hearts;
 
-public enum Rank
+internal enum Rank
 {
     Two,
     Three,

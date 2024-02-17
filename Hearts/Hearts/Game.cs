@@ -2,59 +2,81 @@
 
 namespace Hearts;
 
-public class Game
+internal class Game
 {
-    public List<Round> Rounds { get; } = [];
+    internal Guid Id { get; set; }
+    internal List<Round> Rounds { get; } = [];
     internal Round? CurrentRound => Rounds.LastOrDefault();
-    internal ReadOnlyCollection<Player> Players { get; }
+    internal bool GameComplete { get; private set; }
 
-    public event ActionRequestedEventHandler? ActionRequested;
+    private readonly List<Player> _players = [];
 
-    public delegate void ActionRequestedEventHandler(object source, ActionRequestArgs args);
+    private readonly Deck _deck = new();
 
-    public bool GameComplete { get; private set; }
-
-    public event GameEndedEventHandler? GameEnded;
-
+    private bool _gameStarted;
 
     private readonly int _pointsToEndGame;
-    
-    internal Game(List<Player> players, int pointsToEndGame)
+
+    internal event ActionRequestedEventHandler? ActionRequested;
+
+    internal event GameEndedEventHandler? GameEnded;
+
+    internal Game(int pointsToEndGame)
     {
-        Players = players.AsReadOnly();
         _pointsToEndGame = pointsToEndGame;
+    }
+
+    internal void AddPlayer(Player player)
+    {
+        if (_players.Count == 4)
+            throw new InvalidOperationException("A game of hearts can only have 4 players.");
+
+        if (_gameStarted)
+            throw new InvalidOperationException("You cannot add a player to a game that has already started.");
+
+        _players.Add(player);
     }
 
     internal void StartGame()
     {
-        if (Players.Count != 4)
+        if (_gameStarted)
+            throw new InvalidOperationException("The game has already started.");
+
+        if (_players.Count != 4)
             throw new InvalidOperationException("A game of hearts must have exactly 4 players.");
+
+        _gameStarted = true;
 
         StartRound();
     }
 
-    internal ActionRequestArgs GetActionRequest()
-    {
-        if (CurrentRound?.CurrentTrick == null)
-            throw new InvalidOperationException("You cannot send an action request when there is no current trick.");
-
-        if (CurrentRound.CurrentTrick.NextPlayer == null)
-            throw new InvalidOperationException("You cannot send an action request when there is no next player.");
-
-        return CurrentRound.CurrentTrick.GetActionRequest(CurrentRound.HeartsBroken);
-    }
-
     private void StartRound()
     {
-        var round = new Round(Players);
+        var round = new Round(_players);
+        round.ActionRequested += OnActionRequested;
         round.RoundCompleted += OnRoundCompleted;
-
         Rounds.Add(round);
+
+        DealCards();
+
+        round.StartTrick();
+    }
+
+    private void DealCards()
+    {
+        _deck.Shuffle();
+
+        _deck.Deal(_players);
+    }
+
+    private void OnActionRequested(object source, ActionRequestArgs args)
+    {
+        ActionRequested?.Invoke(source, args);
     }
 
     private void OnRoundCompleted(object? sender, EventArgs args)
     {
-        if (Players.Any(p => p.Score >= _pointsToEndGame))
+        if (_players.Any(p => p.Score >= _pointsToEndGame))
             EndGame();
         else
             StartRound();
@@ -63,26 +85,14 @@ public class Game
     private void EndGame()
     {
         GameComplete = true;
-        GameEnded?.Invoke(this, new GameEndedEventHandlerArgs([.. Players]));
+        GameEnded?.Invoke(this, new GameEndedEventHandlerArgs([.. _players]));
     }
 
-    protected virtual void OnActionRequested()
+    internal void PlayCard(Player player, Card card)
     {
-        ActionRequested?.Invoke(this, GetActionRequest());
+        if (CurrentRound == null)
+            throw new InvalidOperationException("You cannot play a card when there is no current round.");
+
+        CurrentRound.PlayCard(player, card);
     }
-}
-
-public delegate void GameEndedEventHandler(object sender, GameEndedEventHandlerArgs args);
-
-public class GameEndedEventHandlerArgs(List<Player> players)
-{
-    public List<Player> Players => players;
-}
-
-public class ActionRequestArgs : EventArgs
-{
-    public required Player Player { get; init; }
-    public required List<Card> CardsPlayed { get; init; }
-    public required Suit LeadingSuit { get; init; }
-    public required List<Card> ValidActions { get; init; }
 }

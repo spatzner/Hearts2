@@ -2,42 +2,38 @@
 
 namespace Hearts;
 
-public class Round
+internal class Round(List<Player> players)
 {
-    public Round(ReadOnlyCollection<Player> players)
-    {
-        _players = players;
-        StartTrick();
-    }
-    
     internal List<Trick> Tricks { get; } = [];
-    internal Trick CurrentTrick => Tricks.Last();
-    internal bool HeartsBroken { get; set; }
+    internal Trick? CurrentTrick => Tricks.LastOrDefault();
+    internal bool HeartsBroken { get; set; } = false;
     internal bool RoundComplete { get; private set; }
 
     internal event EventHandler? RoundCompleted;
-    
-    private readonly ReadOnlyCollection<Player> _players;
+    internal event ActionRequestedEventHandler? ActionRequested;
 
     internal void StartTrick()
     {
-        var trick = new Trick(GetPlayerOrder());
+        var trick = new Trick(GetPlayerOrder(), HeartsBroken);
+        trick.ActionRequested += OnActionRequested;
         trick.TrickCompleted += OnTrickCompleted;
 
         Tricks.Add(trick);
+
+        trick.StartTrick();
     }
 
     private List<Player> GetPlayerOrder()
     {
-        return _players
-           .SkipWhile(p => p != CurrentTrick.Winner)
-           .Concat(_players.TakeWhile(p => p != CurrentTrick.Winner))
-           .ToList();
+        Player start = (CurrentTrick == null ? players.First(p => p.HasRoundStartCard()) : CurrentTrick.Winner)
+         ?? throw new InvalidOperationException();
+
+        return players.SkipWhile(p => p != start).Concat(players.TakeWhile(p => p != start)).ToList();
     }
 
     private void OnTrickCompleted(object? sender, EventArgs args)
     {
-        if (_players.Any(p => p.Hand!.Count == 0))
+        if (players.Any(p => p.Hand!.Count == 0))
         {
             RoundComplete = true;
             OnRoundCompleted();
@@ -45,8 +41,48 @@ public class Round
         else
             StartTrick();
     }
+
+    internal void PlayCard(Player player, Card card)
+    {
+        if (CurrentTrick == null || CurrentTrick.TrickComplete)
+            throw new InvalidOperationException("You cannot play a card when there is no current trick.");
+
+        HeartsBroken = CurrentTrick.PlayCard(player, card);
+    }
+
     protected virtual void OnRoundCompleted()
     {
+        ScoreRound();
         RoundCompleted?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void ScoreRound()
+    {
+        if (PlayerShotTheMoon())
+            GivePointsToNonWinners();
+        else
+            GivePlayerPoints();
+    }
+
+    private void GivePlayerPoints()
+    {
+        foreach (Trick trick in Tricks)
+            trick.Winner!.TakePoints(trick.GetPoints());
+    }
+
+    private void GivePointsToNonWinners()
+    {
+        foreach (Player player in players.Where(p => p != Tricks.First().Winner))
+            player.TakePoints(Tricks.Sum(t => t.GetPoints()));
+    }
+
+    private bool PlayerShotTheMoon()
+    {
+        return Tricks.Where(t => t.GetPoints() > 0).All(x => x.Winner == Tricks.First().Winner);
+    }
+
+    protected virtual void OnActionRequested(object source, ActionRequestArgs args)
+    {
+        ActionRequested?.Invoke(source, args);
     }
 }

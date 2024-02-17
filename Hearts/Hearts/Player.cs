@@ -1,9 +1,9 @@
 ﻿namespace Hearts;
 
-public class Player(int id, string name)
+internal class Player(string name)
 {
     internal string Name { get; } = name;
-    internal int Id { get; } = id;
+    internal Guid Id { get; } = Guid.NewGuid();
     internal IReadOnlyCollection<Card>? Hand => HandInternal?.AsReadOnly();
 
     private List<Card>? HandInternal { get; set; }
@@ -15,10 +15,29 @@ public class Player(int id, string name)
         HandInternal = hand.ToList();
     }
 
-    internal void TakeTrickPoints(Trick trick)
+    internal void PlayCard(Card card)
     {
-        Score += trick
-           .Cards.Select(x => x.Value)
-           .Sum(c => c.Suit == Suit.Hearts ? 1 : c is { Rank: Rank.Queen, Suit: Suit.Spades } ? 13 : 0);
+        if(HandInternal == null || HandInternal.Count == 0)
+            throw new InvalidOperationException("You cannot play a card when you have no cards.");
+        
+        if(HandInternal.All(c => c != card))
+            throw new InvalidOperationException("You cannot play a card that you do not have.");
+
+        HandInternal.Remove(card);
+    }
+
+    internal bool HasFullHand()
+    {
+        return Hand?.Count == 13;
+    }
+
+    internal bool HasRoundStartCard()
+    {
+        return Hand?.Any(c => c is { Rank: Rank.Two, Suit: Suit.Clubs }) ?? false;
+    }
+
+    internal void TakePoints(int points)
+    {
+        Score += points;
     }
 }
