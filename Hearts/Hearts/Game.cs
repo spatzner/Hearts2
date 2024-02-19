@@ -19,7 +19,9 @@ internal class Game
 
     internal event ActionRequestedEventHandler? ActionRequested;
 
-    internal event GameEndedEventHandler? GameEnded;
+    internal event GameCompletedEventHandler? GameCompleted;
+
+    internal event RoundCompletedEventHandler? RoundCompleted;
 
     internal Game(int pointsToEndGame)
     {
@@ -79,13 +81,16 @@ internal class Game
         if (_players.Any(p => p.Score >= _pointsToEndGame))
             EndGame();
         else
+        {
+            RoundCompleted?.Invoke(this, EventArgs.Empty);
             StartRound();
+        }
     }
 
     private void EndGame()
     {
         GameComplete = true;
-        GameEnded?.Invoke(this, new GameEndedEventHandlerArgs([.. _players]));
+        GameCompleted?.Invoke(this, EventArgs.Empty);
     }
 
     internal void PlayCard(Player player, Card card)
@@ -96,3 +101,9 @@ internal class Game
         CurrentRound.PlayCard(player, card);
     }
 }
+
+internal delegate void RoundCompletedEventHandler(object sender, EventArgs args);
+
+internal delegate void GameCompletedEventHandler(object sender, EventArgs args);
+
+internal delegate void ActionRequestedEventHandler(object source, ActionRequestArgs args);

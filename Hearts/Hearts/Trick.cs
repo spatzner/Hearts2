@@ -18,7 +18,7 @@ internal class Trick(List<Player> players, bool heartsBroken)
         OnActionRequested(this, GetActionRequest());
     }
 
-    internal ActionRequestArgs GetActionRequest()
+    private ActionRequestArgs GetActionRequest()
     {
         var nextPlayer = GetNextPlayer();
 
@@ -29,7 +29,7 @@ internal class Trick(List<Player> players, bool heartsBroken)
                 CardsPlayed = [.. Cards.Values],
                 LeadingSuit = LeadingSuit,
                 Player = nextPlayer,
-                ValidActions = GetValidCardsToPlay()
+                ValidCards = [.. GetValidCardsToPlay(nextPlayer).OrderBy(x => x.Suit).ThenBy(x => x.Rank)]
             };
     }
 
@@ -46,11 +46,8 @@ internal class Trick(List<Player> players, bool heartsBroken)
         if (Cards.ContainsKey(player))
             throw new InvalidOperationException("You have already played a card in this trick.");
 
-        if (card.Suit == Suit.Hearts && !heartsBroken)
-            throw new InvalidOperationException("You cannot play hearts until they have been broken.");
-
-        if (player.Hand!.Any(c => c.Suit == LeadingSuit))
-            throw new InvalidOperationException("You must follow the leading suit if you can.");
+        if(!GetValidCardsToPlay(player).Contains(card))
+            throw new InvalidOperationException("You cannot play that card");
 
         if (card.Suit == Suit.Hearts)
             heartsBroken = true;
@@ -69,27 +66,29 @@ internal class Trick(List<Player> players, bool heartsBroken)
 
     internal int GetPoints()
     {
-        return Cards
-           .Select(x => x.Value)
-           .Sum(c => c.Suit == Suit.Hearts ? 1 : c is { Rank: Rank.Queen, Suit: Suit.Spades } ? 13 : 0);
+        return Cards.Select(x => x.Value).Sum(c => c.Points);
     }
 
-    private List<Card> GetValidCardsToPlay()
+    private IEnumerable<Card> GetValidCardsToPlay(Player? player)
     {
-        Player nextPlayer = GetNextPlayer()
-         ?? throw new InvalidOperationException("You cannot get valid cards to play when there is no next player.");
+        if(player == null) throw new InvalidOperationException("You cannot get valid cards to play when there is no next player.");
+
+        if (Cards.Count == 0 && player.HasFullHand())
+            return player.Hand!.Where(c => c is { Rank: Rank.Two, Suit: Suit.Clubs });
         
+        if(player.Hand!.All(c => c.Suit == Suit.Hearts))
+            return player.Hand!;
+
         if (Cards.Count == 0)
-        {
-            return nextPlayer.HasFullHand()
-                ? nextPlayer.Hand!.Where(c => c is { Rank: Rank.Two, Suit: Suit.Clubs }).ToList()
-                : [.. nextPlayer.Hand!];
-        }
+            return player.Hand!.Where(c => heartsBroken || c.Suit != Suit.Hearts);
 
-        if (nextPlayer.Hand!.Any(c => c.Suit == LeadingSuit))
-            return nextPlayer.Hand!.Where(c => c.Suit == LeadingSuit).ToList();
+        if (player.Hand!.Any(c => c.Suit == LeadingSuit))
+            return player.Hand!.Where(c => c.Suit == LeadingSuit);
 
-        return heartsBroken ? [.. nextPlayer.Hand!] : nextPlayer.Hand!.Where(c => c.Suit != Suit.Hearts).ToList();
+        if (heartsBroken)
+            return player.Hand!;
+
+        return player.Hand!.Where(c => c.Suit != Suit.Hearts);
     }
 
     protected virtual void OnTrickCompleted()
