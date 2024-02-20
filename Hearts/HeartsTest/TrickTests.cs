@@ -69,8 +69,8 @@ public class TrickTests
         player2.DealHand(new List<Card> { new(Suit.Clubs, Rank.Two) });
 
         // Act
-        trick.PlayCard(player1, player1.Hand!.First());
-        trick.PlayCard(player2, player2.Hand!.First());
+        trick.PlayCard(player1, player1.Hand.First());
+        trick.PlayCard(player2, player2.Hand.First());
 
         // Assert
         Assert.IsTrue(trick.TrickComplete);
@@ -93,7 +93,7 @@ public class TrickTests
         player2.DealHand(new List<Card> { new(Suit.Clubs, Rank.Two) });
 
         // Act
-        trick.PlayCard(player1, player1.Hand!.First());
+        trick.PlayCard(player1, player1.Hand.First());
 
         // Assert
         Assert.AreEqual(1, actionRequestedCount);
@@ -122,7 +122,7 @@ public class TrickTests
         Assert.AreEqual(player2, actionRequestArgs.Player);
         Assert.AreEqual(Suit.Clubs, actionRequestArgs.LeadingSuit);
         Assert.IsTrue(actionRequestArgs.CardsPlayed.Contains(card));
-        Assert.IsTrue(actionRequestArgs.ValidCards.SequenceEqual(player2.Hand!));
+        Assert.IsTrue(actionRequestArgs.ValidCards.SequenceEqual(player2.Hand));
     }
 
     [TestMethod]
@@ -265,5 +265,35 @@ public class TrickTests
 
         // Assert
         Assert.IsTrue(actionRequestArgs.ValidCards.Single().Suit == Suit.Diamonds);
+    }
+
+    [TestMethod]
+    public void PlayCard_ThrowsException_WhenPlayerHasNoCards()
+    {
+        // Arrange
+        var player = new Player("Test");
+        var trick = new Trick([player], false);
+        player.DealHand(new List<Card>());
+
+        // Act & Assert
+        Assert.ThrowsException<InvalidOperationException>(() => trick.PlayCard(player, new Card(Suit.Clubs, Rank.Ace)));
+    }
+
+    [TestMethod]
+    public void PlayCard_ThrowsException_WhenCardIsNotValid()
+    {
+        // Arrange
+        var player1 = new Player("Test1");
+        var player2 = new Player("Test2");
+        var card1 = new Card(Suit.Clubs, Rank.Ace);
+        var card2 = new Card(Suit.Hearts, Rank.Two);
+        player1.DealHand(new List<Card> { card1 });
+        player2.DealHand(new List<Card> { card2 });
+        var trick = new Trick([player1, player2], false);
+        trick.PlayCard(player1, card1);
+
+        // Act & Assert
+        Assert.ThrowsException<InvalidOperationException>(() =>
+            trick.PlayCard(player2, new Card(Suit.Hearts, Rank.Three)));
     }
 }

@@ -2,28 +2,22 @@
 
 internal record Card
 {
+    internal Suit Suit { get; }
+    internal Rank Rank { get; }
+    internal int Points { get; }
+
     internal Card(Suit suit, Rank rank)
     {
         Suit = suit;
         Rank = rank;
-        
-        switch (suit)
+
+        Points = suit switch
         {
-            case Suit.Spades when rank == Rank.Queen:
-                Points = 13;
-                break;
-            case Suit.Hearts:
-                Points = 1;
-                break;
-            default:
-                Points = 0;
-                break;
-        }
+            Suit.Spades when rank == Rank.Queen => 13,
+            Suit.Hearts => 1,
+            _ => 0
+        };
     }
-    
-    internal Suit Suit { get; } 
-    internal Rank Rank { get; } 
-    internal int Points { get; }
 
     public override string ToString()
     {

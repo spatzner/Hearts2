@@ -1,1 +1,3 @@
-﻿[assembly: System.Runtime.CompilerServices.InternalsVisibleTo("HeartsTest")]
+﻿using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("HeartsTest")]

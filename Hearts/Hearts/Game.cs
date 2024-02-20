@@ -1,32 +1,23 @@
-﻿using System.Collections.ObjectModel;
+﻿namespace Hearts;
 
-namespace Hearts;
-
-internal class Game
+internal class Game(int pointsToEndGame, IRoundFactory roundFactory)
 {
-    internal Guid Id { get; set; }
-    internal List<Round> Rounds { get; } = [];
-    internal Round? CurrentRound => Rounds.LastOrDefault();
+    internal Guid Id { get; set; } = Guid.NewGuid();
+    internal List<IRound> Rounds { get; } = [];
+    internal IRound? CurrentRound => Rounds.LastOrDefault();
     internal bool GameComplete { get; private set; }
-
-    private readonly List<Player> _players = [];
 
     private readonly Deck _deck = new();
 
-    private bool _gameStarted;
+    private readonly List<Player> _players = [];
 
-    private readonly int _pointsToEndGame;
+    private bool _gameStarted;
 
     internal event ActionRequestedEventHandler? ActionRequested;
 
     internal event GameCompletedEventHandler? GameCompleted;
 
     internal event RoundCompletedEventHandler? RoundCompleted;
-
-    internal Game(int pointsToEndGame)
-    {
-        _pointsToEndGame = pointsToEndGame;
-    }
 
     internal void AddPlayer(Player player)
     {
@@ -52,9 +43,17 @@ internal class Game
         StartRound();
     }
 
+    internal void PlayCard(Player player, Card card)
+    {
+        if (CurrentRound == null)
+            throw new InvalidOperationException("You cannot play a card when there is no current round.");
+
+        CurrentRound.PlayCard(player, card);
+    }
+
     private void StartRound()
     {
-        var round = new Round(_players);
+        IRound round = roundFactory.CreateRound(_players);
         round.ActionRequested += OnActionRequested;
         round.RoundCompleted += OnRoundCompleted;
         Rounds.Add(round);
@@ -66,9 +65,7 @@ internal class Game
 
     private void DealCards()
     {
-        _deck.Shuffle();
-
-        _deck.Deal(_players);
+        _deck.DealShuffled(_players);
     }
 
     private void OnActionRequested(object source, ActionRequestArgs args)
@@ -78,7 +75,7 @@ internal class Game
 
     private void OnRoundCompleted(object? sender, EventArgs args)
     {
-        if (_players.Any(p => p.Score >= _pointsToEndGame))
+        if (_players.Any(p => p.Score >= pointsToEndGame))
             EndGame();
         else
         {
@@ -92,18 +89,4 @@ internal class Game
         GameComplete = true;
         GameCompleted?.Invoke(this, EventArgs.Empty);
     }
-
-    internal void PlayCard(Player player, Card card)
-    {
-        if (CurrentRound == null)
-            throw new InvalidOperationException("You cannot play a card when there is no current round.");
-
-        CurrentRound.PlayCard(player, card);
-    }
 }
-
-internal delegate void RoundCompletedEventHandler(object sender, EventArgs args);
-
-internal delegate void GameCompletedEventHandler(object sender, EventArgs args);
-
-internal delegate void ActionRequestedEventHandler(object source, ActionRequestArgs args);

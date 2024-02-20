@@ -1,20 +1,17 @@
-﻿using System.Collections.ObjectModel;
+﻿namespace Hearts;
 
-namespace Hearts;
-
-internal class Round(List<Player> players)
+internal class Round(List<Player> players, ITrickFactory trickFactory) : IRound
 {
-    internal List<Trick> Tricks { get; } = [];
-    internal Trick? CurrentTrick => Tricks.LastOrDefault();
-    internal bool HeartsBroken { get; set; } = false;
-    internal bool RoundComplete { get; private set; }
+    public List<ITrick> Tricks { get; } = [];
+    public ITrick? CurrentTrick => Tricks.LastOrDefault();
+    public bool HeartsBroken { get; set; }
 
-    internal event EventHandler? RoundCompleted;
-    internal event ActionRequestedEventHandler? ActionRequested;
+    public event EventHandler? RoundCompleted;
+    public event ActionRequestedEventHandler? ActionRequested;
 
-    internal void StartTrick()
+    public void StartTrick()
     {
-        var trick = new Trick(GetPlayerOrder(), HeartsBroken);
+        ITrick trick = trickFactory.CreateTrick(GetPlayerOrder(), HeartsBroken);
         trick.ActionRequested += OnActionRequested;
         trick.TrickCompleted += OnTrickCompleted;
 
@@ -23,26 +20,7 @@ internal class Round(List<Player> players)
         trick.StartTrick();
     }
 
-    private List<Player> GetPlayerOrder()
-    {
-        Player start = (CurrentTrick == null ? players.First(p => p.HasRoundStartCard()) : CurrentTrick.Winner)
-         ?? throw new InvalidOperationException();
-
-        return players.SkipWhile(p => p != start).Concat(players.TakeWhile(p => p != start)).ToList();
-    }
-
-    private void OnTrickCompleted(object? sender, EventArgs args)
-    {
-        if (players.Any(p => p.Hand!.Count == 0))
-        {
-            RoundComplete = true;
-            OnRoundCompleted();
-        }
-        else
-            StartTrick();
-    }
-
-    internal void PlayCard(Player player, Card card)
+    public void PlayCard(Player player, Card card)
     {
         if (CurrentTrick == null || CurrentTrick.TrickComplete)
             throw new InvalidOperationException("You cannot play a card when there is no current trick.");
@@ -56,6 +34,27 @@ internal class Round(List<Player> players)
         RoundCompleted?.Invoke(this, EventArgs.Empty);
     }
 
+    protected virtual void OnActionRequested(object source, ActionRequestArgs args)
+    {
+        ActionRequested?.Invoke(source, args);
+    }
+
+    private List<Player> GetPlayerOrder()
+    {
+        Player start = (CurrentTrick == null ? players.First(p => p.HasRoundStartCard()) : CurrentTrick.Winner)
+         ?? throw new InvalidOperationException();
+
+        return players.SkipWhile(p => p != start).Concat(players.TakeWhile(p => p != start)).ToList();
+    }
+
+    private void OnTrickCompleted(object? sender, EventArgs args)
+    {
+        if (players.Any(p => p.Hand.Count == 0))
+            OnRoundCompleted();
+        else
+            StartTrick();
+    }
+
     private void ScoreRound()
     {
         if (PlayerShotTheMoon())
@@ -64,10 +63,9 @@ internal class Round(List<Player> players)
             GivePlayerPoints();
     }
 
-    private void GivePlayerPoints()
+    private bool PlayerShotTheMoon()
     {
-        foreach (Trick trick in Tricks)
-            trick.Winner!.TakePoints(trick.GetPoints());
+        return Tricks.Where(t => t.GetPoints() > 0).All(x => x.Winner == Tricks.First().Winner);
     }
 
     private void GivePointsToNonWinners()
@@ -76,13 +74,9 @@ internal class Round(List<Player> players)
             player.TakePoints(Tricks.Sum(t => t.GetPoints()));
     }
 
-    private bool PlayerShotTheMoon()
+    private void GivePlayerPoints()
     {
-        return Tricks.Where(t => t.GetPoints() > 0).All(x => x.Winner == Tricks.First().Winner);
-    }
-
-    protected virtual void OnActionRequested(object source, ActionRequestArgs args)
-    {
-        ActionRequested?.Invoke(source, args);
+        foreach (ITrick trick in Tricks)
+            trick.Winner!.TakePoints(trick.GetPoints());
     }
 }

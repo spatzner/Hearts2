@@ -4,9 +4,9 @@ internal class Player(string name)
 {
     internal string Name { get; } = name;
     internal Guid Id { get; } = Guid.NewGuid();
-    internal IReadOnlyCollection<Card>? Hand => HandInternal?.AsReadOnly();
+    internal IReadOnlyCollection<Card> Hand => HandInternal.AsReadOnly();
 
-    private List<Card>? HandInternal { get; set; }
+    private List<Card> HandInternal { get; set; } = [];
 
     internal int Score { get; private set; }
 
@@ -17,10 +17,10 @@ internal class Player(string name)
 
     internal void PlayCard(Card card)
     {
-        if(HandInternal == null || HandInternal.Count == 0)
+        if (HandInternal == null || HandInternal.Count == 0)
             throw new InvalidOperationException("You cannot play a card when you have no cards.");
-        
-        if(HandInternal.All(c => c != card))
+
+        if (HandInternal.All(c => c != card))
             throw new InvalidOperationException("You cannot play a card that you do not have.");
 
         HandInternal.Remove(card);
