@@ -120,7 +120,7 @@ public class TrickTests
 
         // Assert
         Assert.AreEqual(player2, actionRequestArgs.Player);
-        Assert.AreEqual(Suit.Clubs, actionRequestArgs.LeadingSuit);
+        Assert.AreEqual(Suit.Clubs,actionRequestArgs.LeadingSuit);
         Assert.IsTrue(actionRequestArgs.CardsPlayed.Contains(card));
         Assert.IsTrue(actionRequestArgs.ValidCards.SequenceEqual(player2.Hand));
     }

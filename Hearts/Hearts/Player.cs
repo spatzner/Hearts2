@@ -1,6 +1,6 @@
 ﻿namespace Hearts;
 
-internal class Player(string name)
+internal class Player(string name) : IComparable
 {
     internal string Name { get; } = name;
     internal Guid Id { get; } = Guid.NewGuid();
@@ -39,5 +39,13 @@ internal class Player(string name)
     internal void TakePoints(int points)
     {
         Score += points;
+    }
+
+    public int CompareTo(object? obj)
+    {
+        if(obj is Player otherPlayer)
+            return Id.CompareTo(otherPlayer.Id);
+
+        return 1;
     }
 }
