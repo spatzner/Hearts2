@@ -28,7 +28,7 @@ public class PlayerTests
         Assert.IsNotNull(player.Id);
         Assert.AreNotEqual(Guid.Empty, player.Id);
     }
-    
+
     [TestMethod]
     public void DealHand_SetsHandCorrectly()
     {
@@ -100,6 +100,7 @@ public class PlayerTests
         // Assert
         Assert.AreEqual(14, player.Score);
     }
+
     [TestMethod]
     public void PlayCard_ThrowsException_WhenPlayerHasNoCards()
     {
@@ -120,5 +121,4 @@ public class PlayerTests
         // Act & Assert
         Assert.ThrowsException<InvalidOperationException>(() => player.PlayCard(new Card(Suit.Hearts, Rank.Two)));
     }
-
 }

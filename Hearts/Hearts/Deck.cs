@@ -1,12 +1,12 @@
 ﻿namespace Hearts;
 
-internal class Deck
+public class Deck
 {
     public IReadOnlyCollection<Card> Cards => _cards.AsReadOnly();
 
     private List<Card> _cards;
 
-    internal Deck()
+    public Deck()
     {
         _cards = [];
 
@@ -15,7 +15,7 @@ internal class Deck
             _cards.Add(new Card(suit, rank));
     }
 
-    internal void DealShuffled(List<Player> players)
+    public void DealShuffled(List<Player> players)
     {
         Shuffle();
 

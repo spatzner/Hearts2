@@ -1,6 +1,6 @@
 ﻿namespace Hearts;
 
-internal interface IRound
+public interface IRound
 {
     List<ITrick> Tricks { get; }
     ITrick? CurrentTrick { get; }

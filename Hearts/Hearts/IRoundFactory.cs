@@ -1,6 +1,6 @@
 ﻿namespace Hearts;
 
-internal interface IRoundFactory
+public interface IRoundFactory
 {
     IRound CreateRound(List<Player> players);
 }

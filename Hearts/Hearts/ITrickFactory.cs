@@ -1,6 +1,6 @@
 ﻿namespace Hearts;
 
-internal interface ITrickFactory
+public interface ITrickFactory
 {
     public ITrick CreateTrick(List<Player> players, bool heartsBroken);
 }

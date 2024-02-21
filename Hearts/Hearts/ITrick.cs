@@ -1,6 +1,6 @@
 ﻿namespace Hearts;
 
-internal interface ITrick
+public interface ITrick
 {
     Player? Winner { get; set; }
     bool TrickComplete { get; }

@@ -1,6 +1,6 @@
 ﻿namespace Hearts;
 
-internal class TrickFactory : ITrickFactory
+public class TrickFactory : ITrickFactory
 {
     public ITrick CreateTrick(List<Player> players, bool heartsBroken)
     {

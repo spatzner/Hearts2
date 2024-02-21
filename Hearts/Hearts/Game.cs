@@ -1,12 +1,12 @@
 ﻿namespace Hearts;
 
-internal class Game(int pointsToEndGame, IRoundFactory roundFactory)
+public class Game(int pointsToEndGame, IRoundFactory roundFactory)
 {
-    internal Guid Id { get; set; } = Guid.NewGuid();
-    internal List<IRound> Rounds { get; } = [];
-    internal IRound? CurrentRound => Rounds.LastOrDefault();
-    internal bool GameComplete { get; private set; }
-    internal IReadOnlyList<Player> Players => _players.AsReadOnly();
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public List<IRound> Rounds { get; } = [];
+    public IRound? CurrentRound => Rounds.LastOrDefault();
+    public bool GameComplete { get; private set; }
+    public IReadOnlyList<Player> Players => _players.AsReadOnly();
 
     private readonly Deck _deck = new();
 
@@ -14,15 +14,15 @@ internal class Game(int pointsToEndGame, IRoundFactory roundFactory)
 
     private bool _gameStarted;
 
-    internal event ActionRequestedEventHandler? ActionRequested;
+    public event ActionRequestedEventHandler? ActionRequested;
 
-    internal event EventHandler? GameCompleted;
+    public event EventHandler? GameCompleted;
 
-    internal event EventHandler? RoundCompleted;
+    public event EventHandler? RoundCompleted;
 
-    internal event EventHandler? TrickCompleted;
+    public event EventHandler? TrickCompleted;
 
-    internal void AddPlayer(Player player)
+    public void AddPlayer(Player player)
     {
         if (_players.Count == 4)
             throw new InvalidOperationException("A game of hearts can only have 4 players.");
@@ -33,7 +33,7 @@ internal class Game(int pointsToEndGame, IRoundFactory roundFactory)
         _players.Add(player);
     }
 
-    internal void StartGame()
+    public void StartGame()
     {
         if (_gameStarted)
             throw new InvalidOperationException("The game has already started.");
@@ -46,7 +46,7 @@ internal class Game(int pointsToEndGame, IRoundFactory roundFactory)
         StartRound();
     }
 
-    internal void PlayCard(Player player, Card card)
+    public void PlayCard(Player player, Card card)
     {
         if (CurrentRound == null)
             throw new InvalidOperationException("You cannot play a card when there is no current round.");

@@ -1,12 +1,12 @@
 ﻿namespace Hearts;
 
-internal record Card
+public record Card
 {
-    internal Suit Suit { get; }
-    internal Rank Rank { get; }
-    internal int Points { get; }
+    public Suit Suit { get; }
+    public Rank Rank { get; }
+    public int Points { get; }
 
-    internal Card(Suit suit, Rank rank)
+    public Card(Suit suit, Rank rank)
     {
         Suit = suit;
         Rank = rank;

@@ -45,6 +45,7 @@ public class DeckTests
         var allCards = players.SelectMany(p => p.Hand).ToList();
         Assert.AreEqual(allCards.Count, allCards.Distinct().Count());
     }
+
     [TestMethod]
     public void DealShuffled_ShufflesCardsForEachCall()
     {

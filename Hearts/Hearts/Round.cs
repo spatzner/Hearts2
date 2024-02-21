@@ -1,6 +1,6 @@
 ﻿namespace Hearts;
 
-internal class Round(List<Player> players, ITrickFactory trickFactory) : IRound
+public class Round(List<Player> players, ITrickFactory trickFactory) : IRound
 {
     public List<ITrick> Tricks { get; } = [];
     public ITrick? CurrentTrick => Tricks.LastOrDefault();
@@ -69,8 +69,8 @@ internal class Round(List<Player> players, ITrickFactory trickFactory) : IRound
 
     private bool PlayerShotTheMoon()
     {
-        IEnumerable<ITrick> pointedTricks = Tricks.Where(t => t.GetPoints() > 0);
-        return pointedTricks.All(x => x.Winner == pointedTricks.First().Winner); 
+        var pointedTricks = Tricks.Where(t => t.GetPoints() > 0);
+        return pointedTricks.All(x => x.Winner == pointedTricks.First().Winner);
     }
 
     private void GivePointsToNonWinners()

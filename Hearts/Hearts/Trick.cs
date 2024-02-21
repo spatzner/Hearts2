@@ -2,7 +2,7 @@
 
 namespace Hearts;
 
-internal class Trick(List<Player> players, bool heartsBroken) : ITrick
+public class Trick(List<Player> players, bool heartsBroken) : ITrick
 {
     private Suit? LeadingSuit => Cards.FirstOrDefault().Value?.Suit;
     private ReadOnlyCollection<Player> PlayerOrder { get; } = players.AsReadOnly();
@@ -16,11 +16,6 @@ internal class Trick(List<Player> players, bool heartsBroken) : ITrick
     public void StartTrick()
     {
         OnActionRequested(this, GetActionRequest());
-    }
-
-    public Player? GetNextPlayer()
-    {
-        return PlayerOrder.Skip(Cards.Count).FirstOrDefault();
     }
 
     public bool PlayCard(Player player, Card card)
@@ -52,6 +47,11 @@ internal class Trick(List<Player> players, bool heartsBroken) : ITrick
     public int GetPoints()
     {
         return Cards.Select(x => x.Value).Sum(c => c.Points);
+    }
+
+    public Player? GetNextPlayer()
+    {
+        return PlayerOrder.Skip(Cards.Count).FirstOrDefault();
     }
 
     protected virtual void OnTrickCompleted()

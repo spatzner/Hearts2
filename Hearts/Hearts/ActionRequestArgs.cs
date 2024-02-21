@@ -1,9 +1,9 @@
 ﻿namespace Hearts;
 
-internal class ActionRequestArgs : EventArgs
+public class ActionRequestArgs : EventArgs
 {
-    internal required Player Player { get; init; }
-    internal required List<Card> CardsPlayed { get; init; }
-    internal required Suit? LeadingSuit { get; init; }
-    internal required List<Card> ValidCards { get; init; }
+    public required Player Player { get; init; }
+    public required List<Card> CardsPlayed { get; init; }
+    public required Suit? LeadingSuit { get; init; }
+    public required List<Card> ValidCards { get; init; }
 }

@@ -1,6 +1,6 @@
 ﻿namespace Hearts;
 
-internal class RoundFactory(ITrickFactory trickFactory) : IRoundFactory
+public class RoundFactory(ITrickFactory trickFactory) : IRoundFactory
 {
     public IRound CreateRound(List<Player> players)
     {

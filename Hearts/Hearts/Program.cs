@@ -19,32 +19,27 @@ game.TrickCompleted += GameOnTrickCompleted;
 game.RoundCompleted += OnRoundCompleted;
 game.GameCompleted += GameCompleted;
 
-
 void GameOnTrickCompleted(object? sender, EventArgs e)
 {
     Console.WriteLine();
 }
 
-void GameCompleted(object sender, EventArgs args)
+void GameCompleted(object? sender, EventArgs args)
 {
     Console.WriteLine();
     Console.WriteLine("Game Over");
     Console.WriteLine("Final Scores:");
     foreach (Player player in game.Players)
-    {
         Console.WriteLine($"{player.Name}: {player.Score}");
-    }
 }
 
-void OnRoundCompleted(object sender, EventArgs eventArgs)
+void OnRoundCompleted(object? sender, EventArgs eventArgs)
 {
     Console.WriteLine();
     Console.WriteLine("Round completed");
     Console.WriteLine("Scores:");
     foreach (Player player in game.Players)
-    {
         Console.WriteLine($"{player.Name}: {player.Score}");
-    }
     Console.WriteLine();
 }
 
@@ -52,25 +47,22 @@ game.GameCompleted += (_, _) => gameEnded.Set();
 
 game.StartGame();
 
-while (!gameEnded.WaitOne(0))
-{
-    
-}
+while (!gameEnded.WaitOne(0)) { }
 
 Console.ReadKey();
 
 return;
 
-void GameActionReuquested_Automated(object source, ActionRequestArgs args)
+void GameActionReuquested_Automated(object? source, ActionRequestArgs args)
 {
-    var cardToPlay = args.ValidCards.Skip(Random.Shared.Next(0, args.ValidCards.Count - 1)).First();
-    
+    Card cardToPlay = args.ValidCards.Skip(Random.Shared.Next(0, args.ValidCards.Count - 1)).First();
+
     Console.WriteLine($"{args.Player.Name}: {cardToPlay}");
-    
+
     game.PlayCard(args.Player, cardToPlay);
 }
 
-void GameActionRequested(object source, ActionRequestArgs args)
+void GameActionRequested(object? source, ActionRequestArgs args)
 {
     var cardMap = args.ValidCards.Select((card, i) => new { card, idx = i }).ToDictionary(x => x.idx, x => x.card);
 

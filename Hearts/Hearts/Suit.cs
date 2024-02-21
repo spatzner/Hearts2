@@ -1,6 +1,6 @@
 ﻿namespace Hearts;
 
-internal enum Suit
+public enum Suit
 {
     Clubs,
     Diamonds,
