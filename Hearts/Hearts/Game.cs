@@ -6,6 +6,7 @@ internal class Game(int pointsToEndGame, IRoundFactory roundFactory)
     internal List<IRound> Rounds { get; } = [];
     internal IRound? CurrentRound => Rounds.LastOrDefault();
     internal bool GameComplete { get; private set; }
+    internal IReadOnlyList<Player> Players => _players.AsReadOnly();
 
     private readonly Deck _deck = new();
 
@@ -15,9 +16,11 @@ internal class Game(int pointsToEndGame, IRoundFactory roundFactory)
 
     internal event ActionRequestedEventHandler? ActionRequested;
 
-    internal event GameCompletedEventHandler? GameCompleted;
+    internal event EventHandler? GameCompleted;
 
-    internal event RoundCompletedEventHandler? RoundCompleted;
+    internal event EventHandler? RoundCompleted;
+
+    internal event EventHandler? TrickCompleted;
 
     internal void AddPlayer(Player player)
     {
@@ -56,11 +59,17 @@ internal class Game(int pointsToEndGame, IRoundFactory roundFactory)
         IRound round = roundFactory.CreateRound(_players);
         round.ActionRequested += OnActionRequested;
         round.RoundCompleted += OnRoundCompleted;
+        round.TrickCompleted += OnTrickCompleted;
         Rounds.Add(round);
 
         DealCards();
 
         round.StartTrick();
+    }
+
+    private void OnTrickCompleted(object? sender, EventArgs e)
+    {
+        TrickCompleted?.Invoke(this, EventArgs.Empty);
     }
 
     private void DealCards()

@@ -6,22 +6,69 @@ ManualResetEvent actionRequested = new(false);
 ManualResetEvent gameEnded = new(false);
 
 //TODO: Dependency injection
-Game game = new(100, new RoundFactory(new TrickFactory()));
+Game game = new(25, new RoundFactory(new TrickFactory()));
 
 game.AddPlayer(new Player("Alice"));
 game.AddPlayer(new Player("Bob"));
 game.AddPlayer(new Player("Charlie"));
 game.AddPlayer(new Player("David"));
 
-game.ActionRequested += GameActionRequested;
+//game.ActionRequested += GameActionRequested;
+game.ActionRequested += GameActionReuquested_Automated;
+game.TrickCompleted += GameOnTrickCompleted;
+game.RoundCompleted += OnRoundCompleted;
+game.GameCompleted += GameCompleted;
+
+
+void GameOnTrickCompleted(object? sender, EventArgs e)
+{
+    Console.WriteLine();
+}
+
+void GameCompleted(object sender, EventArgs args)
+{
+    Console.WriteLine();
+    Console.WriteLine("Game Over");
+    Console.WriteLine("Final Scores:");
+    foreach (Player player in game.Players)
+    {
+        Console.WriteLine($"{player.Name}: {player.Score}");
+    }
+}
+
+void OnRoundCompleted(object sender, EventArgs eventArgs)
+{
+    Console.WriteLine();
+    Console.WriteLine("Round completed");
+    Console.WriteLine("Scores:");
+    foreach (Player player in game.Players)
+    {
+        Console.WriteLine($"{player.Name}: {player.Score}");
+    }
+    Console.WriteLine();
+}
+
 game.GameCompleted += (_, _) => gameEnded.Set();
 
 game.StartGame();
 
 while (!gameEnded.WaitOne(0))
-    actionRequested.WaitOne();
+{
+    
+}
+
+Console.ReadKey();
 
 return;
+
+void GameActionReuquested_Automated(object source, ActionRequestArgs args)
+{
+    var cardToPlay = args.ValidCards.Skip(Random.Shared.Next(0, args.ValidCards.Count - 1)).First();
+    
+    Console.WriteLine($"{args.Player.Name}: {cardToPlay}");
+    
+    game.PlayCard(args.Player, cardToPlay);
+}
 
 void GameActionRequested(object source, ActionRequestArgs args)
 {

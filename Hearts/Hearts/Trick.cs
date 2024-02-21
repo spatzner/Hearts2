@@ -2,25 +2,10 @@
 
 namespace Hearts;
 
-internal interface ITrick
-{
-    Suit? LeadingSuit { get; }
-    ReadOnlyCollection<Player> PlayerOrder { get; }
-    SortedDictionary<Player, Card> Cards { get; }
-    Player? Winner { get; set; }
-    bool TrickComplete { get; }
-    event ActionRequestedEventHandler? ActionRequested;
-    event EventHandler? TrickCompleted;
-    void StartTrick();
-    Player? GetNextPlayer();
-    bool PlayCard(Player player, Card card);
-    int GetPoints();
-}
-
 internal class Trick(List<Player> players, bool heartsBroken) : ITrick
 {
-    public Suit? LeadingSuit => Cards.FirstOrDefault().Value?.Suit;
-    public ReadOnlyCollection<Player> PlayerOrder { get; } = players.AsReadOnly();
+    private Suit? LeadingSuit => Cards.FirstOrDefault().Value?.Suit;
+    private ReadOnlyCollection<Player> PlayerOrder { get; } = players.AsReadOnly();
     public SortedDictionary<Player, Card> Cards { get; } = [];
     public Player? Winner { get; set; }
     public bool TrickComplete { get; private set; }

@@ -7,6 +7,7 @@ internal class Round(List<Player> players, ITrickFactory trickFactory) : IRound
     public bool HeartsBroken { get; set; }
 
     public event EventHandler? RoundCompleted;
+    public event EventHandler? TrickCompleted;
     public event ActionRequestedEventHandler? ActionRequested;
 
     public void StartTrick()
@@ -23,7 +24,7 @@ internal class Round(List<Player> players, ITrickFactory trickFactory) : IRound
     public void PlayCard(Player player, Card card)
     {
         if (CurrentTrick == null || CurrentTrick.TrickComplete)
-            throw new InvalidOperationException("You cannot play a card when there is no current trick.");
+            throw new InvalidOperationException("You cannot play a card when there is no active trick.");
 
         HeartsBroken = CurrentTrick.PlayCard(player, card);
     }
@@ -52,7 +53,10 @@ internal class Round(List<Player> players, ITrickFactory trickFactory) : IRound
         if (players.Any(p => p.Hand.Count == 0))
             OnRoundCompleted();
         else
+        {
+            TrickCompleted?.Invoke(this, EventArgs.Empty);
             StartTrick();
+        }
     }
 
     private void ScoreRound()
@@ -65,7 +69,8 @@ internal class Round(List<Player> players, ITrickFactory trickFactory) : IRound
 
     private bool PlayerShotTheMoon()
     {
-        return Tricks.Where(t => t.GetPoints() > 0).All(x => x.Winner == Tricks.First().Winner);
+        IEnumerable<ITrick> pointedTricks = Tricks.Where(t => t.GetPoints() > 0);
+        return pointedTricks.All(x => x.Winner == pointedTricks.First().Winner); 
     }
 
     private void GivePointsToNonWinners()
