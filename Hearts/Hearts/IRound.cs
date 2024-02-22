@@ -1,8 +1,10 @@
-﻿namespace Hearts;
+﻿using System.Collections.ObjectModel;
+
+namespace Hearts;
 
 public interface IRound
 {
-    List<ITrick> Tricks { get; }
+    ReadOnlyCollection<ITrick> Tricks { get; }
     ITrick? CurrentTrick { get; }
     bool HeartsBroken { get; set; }
     event EventHandler? TrickCompleted;

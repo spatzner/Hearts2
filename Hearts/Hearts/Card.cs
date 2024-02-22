@@ -1,23 +1,13 @@
 ﻿namespace Hearts;
 
-public record Card
+public record Card(Suit Suit, Rank Rank)
 {
-    public Suit Suit { get; }
-    public Rank Rank { get; }
-    public int Points { get; }
-
-    public Card(Suit suit, Rank rank)
+    public int Points { get; } = Suit switch
     {
-        Suit = suit;
-        Rank = rank;
-
-        Points = suit switch
-        {
-            Suit.Spades when rank == Rank.Queen => 13,
-            Suit.Hearts => 1,
-            _ => 0
-        };
-    }
+        Suit.Spades when Rank == Rank.Queen => 13,
+        Suit.Hearts => 1,
+        _ => 0
+    };
 
     public override string ToString()
     {

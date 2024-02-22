@@ -4,13 +4,14 @@ namespace Hearts;
 
 public class Trick(List<Player> players, bool heartsBroken) : ITrick
 {
-    private Suit? LeadingSuit => Cards.FirstOrDefault().Value?.Suit;
-    private ReadOnlyCollection<Player> PlayerOrder { get; } = players.AsReadOnly();
-    public Player? CurrentPlayer => PlayerOrder.Skip(Cards.Count).FirstOrDefault();
     public SortedDictionary<Player, Card> Cards { get; } = [];
+    public Player? CurrentPlayer => _playerOrder.Skip(Cards.Count).FirstOrDefault();
     public Player? Winner { get; private set; }
     public bool TrickComplete { get; private set; }
     public int Points => Cards.Select(x => x.Value).Sum(c => c.Points);
+
+    private Suit? _leadingSuit;
+    private readonly ReadOnlyCollection<Player> _playerOrder = players.AsReadOnly();
 
     public event ActionRequestedEventHandler? ActionRequested;
     public event EventHandler? TrickCompleted;
@@ -30,12 +31,15 @@ public class Trick(List<Player> players, bool heartsBroken) : ITrick
 
         if (card.Suit == Suit.Hearts)
             heartsBroken = true;
+        
+        if(Cards.Count == 0)
+            _leadingSuit = card.Suit;
 
         Cards[player] = card;
 
         player.PlayCard(card);
 
-        if (Cards.Count == PlayerOrder.Count)
+        if (Cards.Count == _playerOrder.Count)
             OnTrickCompleted();
         else
             OnActionRequested(this, GetActionRequest());
@@ -50,7 +54,7 @@ public class Trick(List<Player> players, bool heartsBroken) : ITrick
             : new ActionRequestArgs
             {
                 CardsPlayed = [.. Cards.Values],
-                LeadingSuit = LeadingSuit,
+                LeadingSuit = _leadingSuit,
                 Player = CurrentPlayer,
                 ValidCards = [.. GetValidCardsToPlay(CurrentPlayer).OrderBy(x => x.Suit).ThenBy(x => x.Rank)]
             };
@@ -70,8 +74,8 @@ public class Trick(List<Player> players, bool heartsBroken) : ITrick
         if (Cards.Count == 0)
             return player.Hand.Where(c => heartsBroken || c.Suit != Suit.Hearts);
 
-        if (player.Hand.Any(c => c.Suit == LeadingSuit))
-            return player.Hand.Where(c => c.Suit == LeadingSuit);
+        if (player.Hand.Any(c => c.Suit == _leadingSuit))
+            return player.Hand.Where(c => c.Suit == _leadingSuit);
 
         if (heartsBroken)
             return player.Hand;
@@ -83,7 +87,7 @@ public class Trick(List<Player> players, bool heartsBroken) : ITrick
     {
         TrickComplete = true;
 
-        Winner = Cards.MaxBy(x => x.Value.Suit == LeadingSuit ? (int)x.Value.Rank : -1).Key;
+        Winner = Cards.MaxBy(x => x.Value.Suit == _leadingSuit ? (int)x.Value.Rank : -1).Key;
 
         TrickCompleted?.Invoke(this, EventArgs.Empty);
     }

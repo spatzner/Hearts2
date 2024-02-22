@@ -1,14 +1,18 @@
-﻿namespace Hearts;
+﻿using System.Collections.ObjectModel;
+
+namespace Hearts;
 
 public class Round(List<Player> players, ITrickFactory trickFactory) : IRound
 {
-    public List<ITrick> Tricks { get; } = [];
-    public ITrick? CurrentTrick => Tricks.LastOrDefault();
-    public bool HeartsBroken { get; set; }
-
     public event EventHandler? RoundCompleted;
     public event EventHandler? TrickCompleted;
     public event ActionRequestedEventHandler? ActionRequested;
+
+    public ReadOnlyCollection<ITrick> Tricks => _tricks.AsReadOnly();
+    public ITrick? CurrentTrick => _tricks.LastOrDefault();
+    public bool HeartsBroken { get; set; }
+
+    private readonly List<ITrick> _tricks = [];
 
     public void StartTrick()
     {
@@ -25,7 +29,7 @@ public class Round(List<Player> players, ITrickFactory trickFactory) : IRound
         trick.ActionRequested += OnActionRequested;
         trick.TrickCompleted += OnTrickCompleted;
 
-        Tricks.Add(trick);
+        _tricks.Add(trick);
 
         trick.StartTrick();
     }
@@ -36,17 +40,6 @@ public class Round(List<Player> players, ITrickFactory trickFactory) : IRound
             throw new InvalidOperationException("You cannot play a card when there is no active trick.");
 
         HeartsBroken = CurrentTrick.PlayCard(player, card);
-    }
-
-    protected virtual void OnRoundCompleted()
-    {
-        ScoreRound();
-        RoundCompleted?.Invoke(this, EventArgs.Empty);
-    }
-
-    protected virtual void OnActionRequested(object source, ActionRequestArgs args)
-    {
-        ActionRequested?.Invoke(source, args);
     }
 
     private List<Player> GetPlayerOrder()
@@ -71,26 +64,27 @@ public class Round(List<Player> players, ITrickFactory trickFactory) : IRound
     private void ScoreRound()
     {
         if (PlayerShotTheMoon())
-            GivePointsToNonWinners();
+            foreach (Player player in players.Where(p => p != _tricks.First().Winner))
+                player.Score += _tricks.Sum(t => t.Points);
         else
-            GivePlayerPoints();
+            foreach (ITrick trick in _tricks)
+                trick.Winner!.Score += trick.Points;
     }
 
     private bool PlayerShotTheMoon()
     {
-        var pointedTricks = Tricks.Where(t => t.Points > 0);
+        var pointedTricks = _tricks.Where(t => t.Points > 0);
         return pointedTricks.All(x => x.Winner == pointedTricks.First().Winner);
     }
 
-    private void GivePointsToNonWinners()
+    protected virtual void OnRoundCompleted()
     {
-        foreach (Player player in players.Where(p => p != Tricks.First().Winner))
-            player.Score += Tricks.Sum(t => t.Points);
+        ScoreRound();
+        RoundCompleted?.Invoke(this, EventArgs.Empty);
     }
 
-    private void GivePlayerPoints()
+    protected virtual void OnActionRequested(object source, ActionRequestArgs args)
     {
-        foreach (ITrick trick in Tricks)
-            trick.Winner!.Score += trick.Points;
+        ActionRequested?.Invoke(source, args);
     }
 }

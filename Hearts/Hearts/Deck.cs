@@ -2,8 +2,6 @@
 
 public class Deck
 {
-    public IReadOnlyCollection<Card> Cards => _cards.AsReadOnly();
-
     private List<Card> _cards;
 
     public Deck()

@@ -8,11 +8,14 @@ public class DeckTests
     [TestMethod]
     public void Deck_Constructor_CreatesFullDeck()
     {
+        
         // Arrange & Act
         var deck = new Deck();
+        var player = new Player("Test");
+        deck.DealShuffled([player]);
 
         // Assert
-        Assert.AreEqual(52, deck.Cards.Count);
+        Assert.AreEqual(52, player.Hand.Count);
     }
 
     [TestMethod]
@@ -20,9 +23,11 @@ public class DeckTests
     {
         // Arrange & Act
         var deck = new Deck();
+        var player = new Player("Test");
+        deck.DealShuffled([player]);
 
         // Assert
-        Assert.AreEqual(deck.Cards.Count, deck.Cards.Distinct().Count());
+        Assert.AreEqual(player.Hand.Count, player.Hand.Distinct().Count());
     }
 
     [TestMethod]

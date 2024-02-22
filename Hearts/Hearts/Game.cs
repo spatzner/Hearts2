@@ -2,6 +2,11 @@
 
 public class Game(int pointsToEndGame, IRoundFactory roundFactory)
 {
+    public event ActionRequestedEventHandler? ActionRequested;
+    public event EventHandler? GameCompleted;
+    public event EventHandler? RoundCompleted;
+    public event EventHandler? TrickCompleted;
+    
     public Guid Id { get; set; } = Guid.NewGuid();
     public List<IRound> Rounds { get; } = [];
     public IRound? CurrentRound => Rounds.LastOrDefault();
@@ -9,18 +14,8 @@ public class Game(int pointsToEndGame, IRoundFactory roundFactory)
     public IReadOnlyList<Player> Players => _players.AsReadOnly();
 
     private readonly Deck _deck = new();
-
     private readonly List<Player> _players = [];
-
     private bool _gameStarted;
-
-    public event ActionRequestedEventHandler? ActionRequested;
-
-    public event EventHandler? GameCompleted;
-
-    public event EventHandler? RoundCompleted;
-
-    public event EventHandler? TrickCompleted;
 
     public void AddPlayer(Player player)
     {
@@ -77,14 +72,20 @@ public class Game(int pointsToEndGame, IRoundFactory roundFactory)
         round.StartTrick();
     }
 
-    private void OnTrickCompleted(object? sender, EventArgs e)
-    {
-        TrickCompleted?.Invoke(this, EventArgs.Empty);
-    }
-
     private void DealCards()
     {
         _deck.DealShuffled(_players);
+    }
+
+    private void EndGame()
+    {
+        GameComplete = true;
+        GameCompleted?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void OnTrickCompleted(object? sender, EventArgs e)
+    {
+        TrickCompleted?.Invoke(this, EventArgs.Empty);
     }
 
     private void OnActionRequested(object source, ActionRequestArgs args)
@@ -101,11 +102,5 @@ public class Game(int pointsToEndGame, IRoundFactory roundFactory)
             RoundCompleted?.Invoke(this, EventArgs.Empty);
             StartRound();
         }
-    }
-
-    private void EndGame()
-    {
-        GameComplete = true;
-        GameCompleted?.Invoke(this, EventArgs.Empty);
     }
 }

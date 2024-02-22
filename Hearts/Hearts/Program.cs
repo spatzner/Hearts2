@@ -2,11 +2,10 @@
 
 using Hearts;
 
-ManualResetEvent actionRequested = new(false);
 ManualResetEvent gameEnded = new(false);
 
 //TODO: Dependency injection
-Game game = new(25, new RoundFactory(new TrickFactory()));
+Game game = new(100, new RoundFactory(new TrickFactory()));
 
 game.AddPlayer(new Player("Alice"));
 game.AddPlayer(new Player("Bob"));
@@ -21,20 +20,23 @@ game.GameCompleted += GameCompleted;
 
 void GameOnTrickCompleted(object? sender, EventArgs e)
 {
+    Console.WriteLine($"Winner: {game.CurrentRound!.CurrentTrick!.Winner!.Name}");
     Console.WriteLine();
 }
 
 void GameCompleted(object? sender, EventArgs args)
 {
+    Console.WriteLine($"Winner: {game.CurrentRound!.CurrentTrick!.Winner!.Name}");
     Console.WriteLine();
     Console.WriteLine("Game Over");
     Console.WriteLine("Final Scores:");
-    foreach (Player player in game.Players)
+    foreach (Player player in game.Players.OrderBy(p => p.Score))
         Console.WriteLine($"{player.Name}: {player.Score}");
 }
 
 void OnRoundCompleted(object? sender, EventArgs eventArgs)
 {
+    Console.WriteLine($"Winner: {game.CurrentRound!.CurrentTrick!.Winner!.Name}");
     Console.WriteLine();
     Console.WriteLine("Round completed");
     Console.WriteLine("Scores:");
