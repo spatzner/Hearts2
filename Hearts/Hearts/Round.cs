@@ -12,6 +12,15 @@ public class Round(List<Player> players, ITrickFactory trickFactory) : IRound
 
     public void StartTrick()
     {
+        //Shouldn't matter in this case because flow should prevent event triggering on old tricks
+        //And also that the Trick doesn't have a longer lifespan tha the Round
+        //But it's a good practice to remove event handlers when they are no longer needed
+        if (CurrentTrick != null)
+        {
+            CurrentTrick.ActionRequested -= OnActionRequested;
+            CurrentTrick.TrickCompleted -= OnTrickCompleted;
+        }
+
         ITrick trick = trickFactory.CreateTrick(GetPlayerOrder(), HeartsBroken);
         trick.ActionRequested += OnActionRequested;
         trick.TrickCompleted += OnTrickCompleted;
@@ -69,19 +78,19 @@ public class Round(List<Player> players, ITrickFactory trickFactory) : IRound
 
     private bool PlayerShotTheMoon()
     {
-        var pointedTricks = Tricks.Where(t => t.GetPoints() > 0);
+        var pointedTricks = Tricks.Where(t => t.Points > 0);
         return pointedTricks.All(x => x.Winner == pointedTricks.First().Winner);
     }
 
     private void GivePointsToNonWinners()
     {
         foreach (Player player in players.Where(p => p != Tricks.First().Winner))
-            player.TakePoints(Tricks.Sum(t => t.GetPoints()));
+            player.Score += Tricks.Sum(t => t.Points);
     }
 
     private void GivePlayerPoints()
     {
         foreach (ITrick trick in Tricks)
-            trick.Winner!.TakePoints(trick.GetPoints());
+            trick.Winner!.Score += trick.Points;
     }
 }

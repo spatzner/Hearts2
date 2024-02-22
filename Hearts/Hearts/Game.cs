@@ -56,6 +56,16 @@ public class Game(int pointsToEndGame, IRoundFactory roundFactory)
 
     private void StartRound()
     {
+        //Shouldn't matter in this case because flow should prevent event triggering on old Rounds
+        //And also that the Round doesn't have a longer lifespan tha the Game
+        //But it's a good practice to remove event handlers when they are no longer needed
+        if (CurrentRound != null)
+        {
+            CurrentRound.ActionRequested -= OnActionRequested;
+            CurrentRound.RoundCompleted -= OnRoundCompleted;
+            CurrentRound.TrickCompleted -= OnTrickCompleted;
+        }
+
         IRound round = roundFactory.CreateRound(_players);
         round.ActionRequested += OnActionRequested;
         round.RoundCompleted += OnRoundCompleted;

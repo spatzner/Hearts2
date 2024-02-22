@@ -32,7 +32,7 @@ public class TrickTests
         trick.PlayCard(player, card);
 
         // Act
-        var points = trick.GetPoints();
+        var points = trick.Points;
 
         // Assert
         Assert.AreEqual(1, points);
@@ -47,7 +47,7 @@ public class TrickTests
         var trick = new Trick([player1, player2], false);
 
         // Act
-        Player? nextPlayer = trick.GetNextPlayer();
+        Player? nextPlayer = trick.CurrentPlayer;
 
         // Assert
         Assert.AreEqual(player1, nextPlayer);

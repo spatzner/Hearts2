@@ -59,21 +59,6 @@ public class PlayerTests
     }
 
     [TestMethod]
-    public void HasFullHand_ReturnsTrueWhenHandHas13Cards()
-    {
-        // Arrange
-        var player = new Player("Test");
-        var hand = Enumerable.Range(1, 13).Select(i => new Card(Suit.Clubs, (Rank)i)).ToList();
-        player.DealHand(hand);
-
-        // Act
-        var result = player.HasFullHand();
-
-        // Assert
-        Assert.IsTrue(result);
-    }
-
-    [TestMethod]
     public void HasRoundStartCard_ReturnsTrueWhenHandContainsTwoOfClubs()
     {
         // Arrange
@@ -95,7 +80,7 @@ public class PlayerTests
         var player = new Player("Test");
 
         // Act
-        player.TakePoints(14);
+        player.Score += 14;
 
         // Assert
         Assert.AreEqual(14, player.Score);
