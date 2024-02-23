@@ -1,6 +1,6 @@
 ﻿namespace Hearts;
 
-public class Game(int pointsToEndGame, IRoundFactory roundFactory)
+public class Game(int pointsToEndGame, IRoundFactory roundFactory, IDeck deck)
 {
     public event ActionRequestedEventHandler? ActionRequested;
     public event EventHandler? GameCompleted;
@@ -13,7 +13,6 @@ public class Game(int pointsToEndGame, IRoundFactory roundFactory)
     public bool GameComplete { get; private set; }
     public IReadOnlyList<Player> Players => _players.AsReadOnly();
 
-    private readonly Deck _deck = new();
     private readonly List<Player> _players = [];
     private bool _gameStarted;
 
@@ -74,7 +73,7 @@ public class Game(int pointsToEndGame, IRoundFactory roundFactory)
 
     private void DealCards()
     {
-        _deck.DealShuffled(_players);
+        deck.DealShuffled(_players);
     }
 
     private void EndGame()

@@ -1,6 +1,11 @@
 ﻿namespace Hearts;
 
-public class Deck
+public interface IDeck
+{
+    void DealShuffled(List<Player> players);
+}
+
+public class Deck : IDeck
 {
     private List<Card> _cards;
 
