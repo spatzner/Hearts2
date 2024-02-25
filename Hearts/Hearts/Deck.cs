@@ -2,8 +2,6 @@
 
 public class Deck : IDeck
 {
-    public Card StartingCard { get; private set; }
-    
     private readonly List<Card> _cardsToRemove =
     [
         new Card(Suit.Diamonds, Rank.Two),
@@ -26,6 +24,8 @@ public class Deck : IDeck
 
         StartingCard = _cards.Where(c => c.Suit == Suit.Clubs).MinBy(c => c.Rank)!;
     }
+
+    public Card StartingCard { get; }
 
     public void DealShuffled(List<Player> players)
     {

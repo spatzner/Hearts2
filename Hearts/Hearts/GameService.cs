@@ -31,7 +31,7 @@ public class GameService : IHostedService
     private async Task PromptInitialization()
     {
         await Task.Delay(100);
-        
+
         Console.WriteLine("Welcome to Hearts!");
         Console.WriteLine("Please enter the names of the players. Type -Start to begin");
 

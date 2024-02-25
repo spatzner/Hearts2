@@ -4,8 +4,8 @@ namespace Hearts;
 
 public class Trick(List<Player> players) : ITrick
 {
-    public Player? CurrentPlayer => _playerOrder.Skip(Cards.Count).FirstOrDefault();
     private readonly ReadOnlyCollection<Player> _playerOrder = players.AsReadOnly();
+    public Player? CurrentPlayer => _playerOrder.Skip(Cards.Count).FirstOrDefault();
 
     public Suit? LeadingSuit { get; private set; }
     public SortedDictionary<Player, Card> Cards { get; } = [];
@@ -27,9 +27,8 @@ public class Trick(List<Player> players) : ITrick
 
         if (Cards.Count != _playerOrder.Count)
             return;
-        
+
         TrickComplete = true;
         Winner = Cards.MaxBy(x => x.Value.Suit == LeadingSuit ? (int)x.Value.Rank : -1).Key;
     }
-        
 }

@@ -8,7 +8,6 @@ public class DeckTests
     [TestMethod]
     public void Deck_Constructor_CreatesFullDeck()
     {
-        
         // Arrange & Act
         var deck = new Deck(4);
         var player = new Player("Test");
@@ -17,11 +16,10 @@ public class DeckTests
         // Assert
         Assert.AreEqual(52, player.Hand.Count);
     }
-    
+
     [TestMethod]
     public void Deck_Constructor_RemovesCardsToMakeEvenHands()
     {
-
         // Arrange & Act
         var deck = new Deck(3);
         List<Player> players = [new Player("Test1"), new Player("Test2"), new Player("Test3")];

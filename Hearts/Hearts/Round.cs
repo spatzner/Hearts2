@@ -4,8 +4,9 @@ namespace Hearts;
 
 public class Round(List<Player> players, ITrickFactory trickFactory, IDeckFactory deckFactory) : IRound
 {
-    private readonly List<ITrick> _tricks = [];
     private readonly IDeck _deck = deckFactory.CreateDeck(players.Count);
+    private readonly List<ITrick> _tricks = [];
+    
     public event EventHandler? RoundCompleted;
     public event EventHandler? TrickCompleted;
     public event ActionRequestedEventHandler? ActionRequested;
@@ -18,15 +19,6 @@ public class Round(List<Player> players, ITrickFactory trickFactory, IDeckFactor
     {
         _deck.DealShuffled(players);
         StartTrick();
-    }
-
-    private void StartTrick()
-    {
-        ITrick trick = trickFactory.CreateTrick(GetPlayerOrder());
-
-        _tricks.Add(trick);
-
-        ActionRequested?.Invoke(this, GetActionRequest());
     }
 
     public void PlayCard(Player player, Card card)
@@ -54,6 +46,15 @@ public class Round(List<Player> players, ITrickFactory trickFactory, IDeckFactor
         RoundCompleted?.Invoke(this, EventArgs.Empty);
     }
 
+    private void StartTrick()
+    {
+        ITrick trick = trickFactory.CreateTrick(GetPlayerOrder());
+
+        _tricks.Add(trick);
+
+        ActionRequested?.Invoke(this, GetActionRequest());
+    }
+
     private ActionRequestArgs GetActionRequest()
     {
         return CurrentTrick!.CurrentPlayer == null
@@ -69,7 +70,7 @@ public class Round(List<Player> players, ITrickFactory trickFactory, IDeckFactor
 
     private IEnumerable<Card> GetValidCardsToPlay()
     {
-        var player = CurrentTrick?.CurrentPlayer
+        Player player = CurrentTrick?.CurrentPlayer
          ?? throw new InvalidOperationException("You cannot get valid cards to play when there is no next player.");
 
         if (Tricks.Count == 1 && CurrentTrick!.Cards.Count == 0)
@@ -92,7 +93,8 @@ public class Round(List<Player> players, ITrickFactory trickFactory, IDeckFactor
 
     private List<Player> GetPlayerOrder()
     {
-        Player start = (CurrentTrick == null ? players.First(p => p.Hand.Contains(_deck.StartingCard)) : CurrentTrick.Winner)
+        Player start =
+            (CurrentTrick == null ? players.First(p => p.Hand.Contains(_deck.StartingCard)) : CurrentTrick.Winner)
          ?? throw new InvalidOperationException();
 
         return players.SkipWhile(p => p != start).Concat(players.TakeWhile(p => p != start)).ToList();

@@ -2,6 +2,6 @@
 
 public interface IDeck
 {
-    void DealShuffled(List<Player> players);
     Card StartingCard { get; }
+    void DealShuffled(List<Player> players);
 }

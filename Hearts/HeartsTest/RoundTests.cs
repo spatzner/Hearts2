@@ -1,7 +1,4 @@
-﻿using System.Numerics;
-using System.Runtime.CompilerServices;
-using System.Xml.Linq;
-using Hearts;
+﻿using Hearts;
 using Moq;
 
 namespace HeartsTest;
@@ -9,9 +6,9 @@ namespace HeartsTest;
 [TestClass]
 public class RoundTests
 {
-    private ITrickFactory _trickFactory = null!;
-    private Mock<IDeckFactory> _mockDeckFactory = null!;
     private Mock<IDeck> _mockDeck = null!;
+    private Mock<IDeckFactory> _mockDeckFactory = null!;
+    private ITrickFactory _trickFactory = null!;
 
     [TestInitialize]
     public void SetUp()
@@ -26,20 +23,18 @@ public class RoundTests
     public void StartRound_RaisesActionRequested()
     {
         //Arrange
-        bool eventRaised = false;
+        var eventRaised = false;
         List<Player> players =
             [new Player("Player0"), new Player("Player1"), new Player("Player2"), new Player("Player3")];
-        Round sut = new Round(players, _trickFactory, _mockDeckFactory.Object);
+        var sut = new Round(players, _trickFactory, _mockDeckFactory.Object);
         sut.ActionRequested += (sender, args) => eventRaised = true;
 
         _mockDeck
            .Setup(x => x.DealShuffled(players))
            .Callback(() =>
             {
-                for (int i = 0; i < players.Count; i++)
-                {
+                for (var i = 0; i < players.Count; i++)
                     players[i].DealHand([new Card(Suit.Clubs, (Rank)i)]);
-                }
             });
         _mockDeck.Setup(x => x.StartingCard).Returns(new Card(Suit.Clubs, Rank.Two));
 
@@ -58,16 +53,14 @@ public class RoundTests
 
         List<Player> players =
             [new Player("Player0"), new Player("Player1"), new Player("Player2"), new Player("Player3")];
-        Round sut = new Round(players, _trickFactory, _mockDeckFactory.Object);
+        var sut = new Round(players, _trickFactory, _mockDeckFactory.Object);
 
         _mockDeck
            .Setup(x => x.DealShuffled(players))
            .Callback(() =>
             {
-                for (int i = 0; i < players.Count; i++)
-                {
+                for (var i = 0; i < players.Count; i++)
                     players[i].DealHand([new Card(Suit.Clubs, (Rank)i)]);
-                }
             });
         _mockDeck.Setup(x => x.StartingCard).Returns(new Card(Suit.Clubs, Rank.Two));
 
@@ -95,17 +88,15 @@ public class RoundTests
 
         List<Player> players =
             [new Player("Player0"), new Player("Player1"), new Player("Player2"), new Player("Player3")];
-        Round sut = new Round(players, _trickFactory, _mockDeckFactory.Object);
+        var sut = new Round(players, _trickFactory, _mockDeckFactory.Object);
         sut.ActionRequested += (sender, args1) => args = args1;
 
         _mockDeck
            .Setup(x => x.DealShuffled(players))
            .Callback(() =>
             {
-                for (int i = 0; i < players.Count; i++)
-                {
+                for (var i = 0; i < players.Count; i++)
                     players[i].DealHand([new Card(Suit.Clubs, (Rank)i)]);
-                }
             });
         _mockDeck.Setup(x => x.StartingCard).Returns(new Card(Suit.Clubs, Rank.Two));
 
@@ -124,7 +115,7 @@ public class RoundTests
 
         List<Player> players =
             [new Player("Player0"), new Player("Player1"), new Player("Player2"), new Player("Player3")];
-        Round sut = new Round(players, _trickFactory, _mockDeckFactory.Object);
+        var sut = new Round(players, _trickFactory, _mockDeckFactory.Object);
         sut.ActionRequested += (sender, args1) => args = args1;
 
         _mockDeck
@@ -153,7 +144,7 @@ public class RoundTests
 
         List<Player> players =
             [new Player("Player0"), new Player("Player1"), new Player("Player2"), new Player("Player3")];
-        Round sut = new Round(players, _trickFactory, _mockDeckFactory.Object);
+        var sut = new Round(players, _trickFactory, _mockDeckFactory.Object);
         sut.ActionRequested += (sender, args1) => args = args1;
 
         _mockDeck
@@ -192,7 +183,7 @@ public class RoundTests
 
         List<Player> players =
             [new Player("Player0"), new Player("Player1"), new Player("Player2"), new Player("Player3")];
-        Round sut = new Round(players, _trickFactory, _mockDeckFactory.Object);
+        var sut = new Round(players, _trickFactory, _mockDeckFactory.Object);
         sut.ActionRequested += (sender, args1) => args = args1;
 
         _mockDeck
@@ -231,7 +222,7 @@ public class RoundTests
 
         List<Player> players =
             [new Player("Player0"), new Player("Player1"), new Player("Player2"), new Player("Player3")];
-        Round sut = new Round(players, _trickFactory, _mockDeckFactory.Object);
+        var sut = new Round(players, _trickFactory, _mockDeckFactory.Object);
         sut.ActionRequested += (sender, args1) => args = args1;
 
         _mockDeck
@@ -260,7 +251,7 @@ public class RoundTests
 
         List<Player> players =
             [new Player("Player0"), new Player("Player1"), new Player("Player2"), new Player("Player3")];
-        Round sut = new Round(players, _trickFactory, _mockDeckFactory.Object);
+        var sut = new Round(players, _trickFactory, _mockDeckFactory.Object);
         sut.ActionRequested += (sender, args1) => args = args1;
 
         _mockDeck
@@ -299,7 +290,7 @@ public class RoundTests
 
         List<Player> players =
             [new Player("Player0"), new Player("Player1"), new Player("Player2"), new Player("Player3")];
-        Round sut = new Round(players, _trickFactory, _mockDeckFactory.Object);
+        var sut = new Round(players, _trickFactory, _mockDeckFactory.Object);
         sut.ActionRequested += (sender, args1) => args = args1;
 
         _mockDeck
@@ -346,7 +337,7 @@ public class RoundTests
 
         List<Player> players =
             [new Player("Player0"), new Player("Player1"), new Player("Player2"), new Player("Player3")];
-        Round sut = new Round(players, _trickFactory, _mockDeckFactory.Object);
+        var sut = new Round(players, _trickFactory, _mockDeckFactory.Object);
         sut.ActionRequested += (sender, args1) => args = args1;
 
         _mockDeck
@@ -387,7 +378,7 @@ public class RoundTests
 
         List<Player> players =
             [new Player("Player0"), new Player("Player1"), new Player("Player2"), new Player("Player3")];
-        Round sut = new Round(players, _trickFactory, _mockDeckFactory.Object);
+        var sut = new Round(players, _trickFactory, _mockDeckFactory.Object);
         sut.ActionRequested += (sender, args1) => args = args1;
 
         _mockDeck
@@ -430,7 +421,7 @@ public class RoundTests
 
         List<Player> players =
             [new Player("Player0"), new Player("Player1"), new Player("Player2"), new Player("Player3")];
-        Round sut = new Round(players, _trickFactory, _mockDeckFactory.Object);
+        var sut = new Round(players, _trickFactory, _mockDeckFactory.Object);
         sut.ActionRequested += (sender, args1) => args = args1;
 
         _mockDeck
@@ -473,7 +464,7 @@ public class RoundTests
 
         List<Player> players =
             [new Player("Player0"), new Player("Player1"), new Player("Player2"), new Player("Player3")];
-        Round sut = new Round(players, _trickFactory, _mockDeckFactory.Object);
+        var sut = new Round(players, _trickFactory, _mockDeckFactory.Object);
         sut.ActionRequested += (sender, args1) => args = args1;
 
         _mockDeck
@@ -509,7 +500,7 @@ public class RoundTests
 
         List<Player> players =
             [new Player("Player0"), new Player("Player1"), new Player("Player2"), new Player("Player3")];
-        Round sut = new Round(players, _trickFactory, _mockDeckFactory.Object);
+        var sut = new Round(players, _trickFactory, _mockDeckFactory.Object);
         sut.ActionRequested += (sender, args1) => args = args1;
 
         _mockDeck
@@ -539,7 +530,7 @@ public class RoundTests
 
         List<Player> players =
             [new Player("Player0"), new Player("Player1"), new Player("Player2"), new Player("Player3")];
-        Round sut = new Round(players, _trickFactory, _mockDeckFactory.Object);
+        var sut = new Round(players, _trickFactory, _mockDeckFactory.Object);
         sut.ActionRequested += (sender, args1) => args = args1;
 
         _mockDeck
@@ -564,11 +555,11 @@ public class RoundTests
     public void WhenPlayersAreOutOfCards_RoundIsCompleted()
     {
         //Arrange
-        bool eventRaised = false;
+        var eventRaised = false;
 
         List<Player> players =
             [new Player("Player0"), new Player("Player1"), new Player("Player2"), new Player("Player3")];
-        Round sut = new Round(players, _trickFactory, _mockDeckFactory.Object);
+        var sut = new Round(players, _trickFactory, _mockDeckFactory.Object);
         sut.RoundCompleted += (sender, args1) => eventRaised = true;
 
         _mockDeck
@@ -597,11 +588,11 @@ public class RoundTests
     public void WhenTrickCompletedButRoundIsNotCompleted_RaisesTrickCompletedEvent()
     {
         //Arrange
-        bool eventRaised = false;
+        var eventRaised = false;
 
         List<Player> players =
             [new Player("Player0"), new Player("Player1"), new Player("Player2"), new Player("Player3")];
-        Round sut = new Round(players, _trickFactory, _mockDeckFactory.Object);
+        var sut = new Round(players, _trickFactory, _mockDeckFactory.Object);
         sut.TrickCompleted += (sender, args1) => eventRaised = true;
 
         _mockDeck
@@ -633,7 +624,7 @@ public class RoundTests
 
         List<Player> players =
             [new Player("Player0"), new Player("Player1"), new Player("Player2"), new Player("Player3")];
-        Round sut = new Round(players, _trickFactory, _mockDeckFactory.Object);
+        var sut = new Round(players, _trickFactory, _mockDeckFactory.Object);
 
         _mockDeck
            .Setup(x => x.DealShuffled(players))
@@ -650,7 +641,7 @@ public class RoundTests
         sut.StartRound();
 
         //Act
-        for (int i = 0; i < 13; i++)
+        for (var i = 0; i < 13; i++)
         {
             sut.PlayCard(players[0], players[0].Hand.First());
             sut.PlayCard(players[1], players[1].Hand.First());
@@ -671,8 +662,8 @@ public class RoundTests
 
         List<Player> players =
             [new Player("Player0"), new Player("Player1"), new Player("Player2"), new Player("Player3")];
-        Round sut = new Round(players, _trickFactory, _mockDeckFactory.Object);
-        
+        var sut = new Round(players, _trickFactory, _mockDeckFactory.Object);
+
         sut.ActionRequested += (sender, args) => { sut.PlayCard(args.Player, args.ValidCards[0]); };
 
         _mockDeck
@@ -680,10 +671,74 @@ public class RoundTests
            .Callback(() =>
             {
                 //example of random hands
-                players[0].DealHand(new List<Card>{ new(Suit.Diamonds, Rank.Three), new(Suit.Spades, Rank.Eight), new(Suit.Clubs, Rank.Ten), new(Suit.Diamonds, Rank.Eight), new(Suit.Hearts, Rank.Two), new(Suit.Diamonds, Rank.Six), new(Suit.Spades, Rank.Four), new(Suit.Diamonds, Rank.Jack), new(Suit.Clubs, Rank.Ace), new(Suit.Clubs, Rank.Four), new(Suit.Clubs, Rank.Five), new(Suit.Hearts, Rank.Three), new(Suit.Diamonds, Rank.Five) });
-                players[1].DealHand(new List<Card> { new(Suit.Spades, Rank.Nine), new(Suit.Diamonds, Rank.Ten), new(Suit.Hearts, Rank.Eight), new(Suit.Diamonds, Rank.Four), new(Suit.Diamonds, Rank.Two), new(Suit.Hearts, Rank.Nine), new(Suit.Spades, Rank.Two), new(Suit.Spades, Rank.Three), new(Suit.Hearts, Rank.Four), new(Suit.Spades, Rank.Six), new(Suit.Hearts, Rank.Jack), new(Suit.Spades, Rank.Seven), new(Suit.Diamonds, Rank.Nine) });
-                players[2].DealHand(new List<Card> { new(Suit.Clubs, Rank.Eight), new(Suit.Hearts, Rank.Five), new(Suit.Hearts, Rank.Ten), new(Suit.Diamonds, Rank.Queen), new(Suit.Spades, Rank.Ace), new(Suit.Spades, Rank.Five), new(Suit.Hearts, Rank.Six), new(Suit.Clubs, Rank.Queen), new(Suit.Diamonds, Rank.King), new(Suit.Hearts, Rank.Seven), new(Suit.Hearts, Rank.King), new(Suit.Diamonds, Rank.Seven), new(Suit.Spades, Rank.Jack) });
-                players[3].DealHand(new List<Card> { new(Suit.Spades, Rank.Ten), new(Suit.Spades, Rank.Queen), new(Suit.Clubs, Rank.Two), new(Suit.Clubs, Rank.Jack), new(Suit.Clubs, Rank.Six), new(Suit.Clubs, Rank.Seven), new(Suit.Diamonds, Rank.Ace), new(Suit.Clubs, Rank.Nine), new(Suit.Clubs, Rank.King), new(Suit.Spades, Rank.King), new(Suit.Clubs, Rank.Three), new(Suit.Hearts, Rank.Queen), new(Suit.Hearts, Rank.Ace) });
+                players[0]
+                   .DealHand(new List<Card>
+                    {
+                        new(Suit.Diamonds, Rank.Three),
+                        new(Suit.Spades, Rank.Eight),
+                        new(Suit.Clubs, Rank.Ten),
+                        new(Suit.Diamonds, Rank.Eight),
+                        new(Suit.Hearts, Rank.Two),
+                        new(Suit.Diamonds, Rank.Six),
+                        new(Suit.Spades, Rank.Four),
+                        new(Suit.Diamonds, Rank.Jack),
+                        new(Suit.Clubs, Rank.Ace),
+                        new(Suit.Clubs, Rank.Four),
+                        new(Suit.Clubs, Rank.Five),
+                        new(Suit.Hearts, Rank.Three),
+                        new(Suit.Diamonds, Rank.Five)
+                    });
+                players[1]
+                   .DealHand(new List<Card>
+                    {
+                        new(Suit.Spades, Rank.Nine),
+                        new(Suit.Diamonds, Rank.Ten),
+                        new(Suit.Hearts, Rank.Eight),
+                        new(Suit.Diamonds, Rank.Four),
+                        new(Suit.Diamonds, Rank.Two),
+                        new(Suit.Hearts, Rank.Nine),
+                        new(Suit.Spades, Rank.Two),
+                        new(Suit.Spades, Rank.Three),
+                        new(Suit.Hearts, Rank.Four),
+                        new(Suit.Spades, Rank.Six),
+                        new(Suit.Hearts, Rank.Jack),
+                        new(Suit.Spades, Rank.Seven),
+                        new(Suit.Diamonds, Rank.Nine)
+                    });
+                players[2]
+                   .DealHand(new List<Card>
+                    {
+                        new(Suit.Clubs, Rank.Eight),
+                        new(Suit.Hearts, Rank.Five),
+                        new(Suit.Hearts, Rank.Ten),
+                        new(Suit.Diamonds, Rank.Queen),
+                        new(Suit.Spades, Rank.Ace),
+                        new(Suit.Spades, Rank.Five),
+                        new(Suit.Hearts, Rank.Six),
+                        new(Suit.Clubs, Rank.Queen),
+                        new(Suit.Diamonds, Rank.King),
+                        new(Suit.Hearts, Rank.Seven),
+                        new(Suit.Hearts, Rank.King),
+                        new(Suit.Diamonds, Rank.Seven),
+                        new(Suit.Spades, Rank.Jack)
+                    });
+                players[3]
+                   .DealHand(new List<Card>
+                    {
+                        new(Suit.Spades, Rank.Ten),
+                        new(Suit.Spades, Rank.Queen),
+                        new(Suit.Clubs, Rank.Two),
+                        new(Suit.Clubs, Rank.Jack),
+                        new(Suit.Clubs, Rank.Six),
+                        new(Suit.Clubs, Rank.Seven),
+                        new(Suit.Diamonds, Rank.Ace),
+                        new(Suit.Clubs, Rank.Nine),
+                        new(Suit.Clubs, Rank.King),
+                        new(Suit.Spades, Rank.King),
+                        new(Suit.Clubs, Rank.Three),
+                        new(Suit.Hearts, Rank.Queen),
+                        new(Suit.Hearts, Rank.Ace)
+                    });
             });
         _mockDeck.Setup(x => x.StartingCard).Returns(new Card(Suit.Clubs, Rank.Two));
 
@@ -701,16 +756,16 @@ public class RoundTests
     {
         List<Player> players =
             [new Player("Player0"), new Player("Player1"), new Player("Player2"), new Player("Player3")];
-        
-        Deck deck = new Deck(4);
-        
+
+        var deck = new Deck(4);
+
         deck.DealShuffled(players);
 
-        string p0hand = string.Join(", ", players[0].Hand.Select(c => $"new Card(Suit.{c.Suit}, Rank.{c.Rank})"));
-        string p1hand = string.Join(", ", players[1].Hand.Select(c => $"new Card(Suit.{c.Suit}, Rank.{c.Rank})"));
-        string p2hand = string.Join(", ", players[2].Hand.Select(c => $"new Card(Suit.{c.Suit}, Rank.{c.Rank})"));
-        string p3hand = string.Join(", ", players[3].Hand.Select(c => $"new Card(Suit.{c.Suit}, Rank.{c.Rank})"));
-        int x = 0;
+        var p0hand = string.Join(", ", players[0].Hand.Select(c => $"new Card(Suit.{c.Suit}, Rank.{c.Rank})"));
+        var p1hand = string.Join(", ", players[1].Hand.Select(c => $"new Card(Suit.{c.Suit}, Rank.{c.Rank})"));
+        var p2hand = string.Join(", ", players[2].Hand.Select(c => $"new Card(Suit.{c.Suit}, Rank.{c.Rank})"));
+        var p3hand = string.Join(", ", players[3].Hand.Select(c => $"new Card(Suit.{c.Suit}, Rank.{c.Rank})"));
+        var x = 0;
     }
 
     //round scoring tests
