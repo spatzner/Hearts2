@@ -4,30 +4,21 @@ namespace Hearts;
 
 public class GameService : IHostedService
 {
-    readonly ManualResetEvent _gameEnded = new(false);
     private readonly Game _game;
 
     public GameService(Game game)
     {
         _game = game;
 
-        //TODO: move to console prompts
-        _game.AddPlayer(new Player("Alice"));
-        _game.AddPlayer(new Player("Bob"));
-        _game.AddPlayer(new Player("Charlie"));
-        _game.AddPlayer(new Player("David"));
-
         _game.ActionRequested += GameActionRequested_Automated;
         _game.TrickCompleted += GameOnTrickCompleted;
         _game.RoundCompleted += OnRoundCompleted;
         _game.GameCompleted += GameCompleted;
-
-        _game.GameCompleted += (_, _) => _gameEnded.Set();
     }
 
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        Task.Run(() => _game.StartGame(), cancellationToken);
+        Task.Run(PromptInitialization, cancellationToken);
 
         return Task.CompletedTask;
     }
@@ -37,7 +28,31 @@ public class GameService : IHostedService
         return Task.CompletedTask;
     }
 
-    void GameActionRequested_Automated(object? source, ActionRequestArgs args)
+    private async Task PromptInitialization()
+    {
+        await Task.Delay(100);
+        
+        Console.WriteLine("Welcome to Hearts!");
+        Console.WriteLine("Please enter the names of the players. Type -Start to begin");
+
+        while (true)
+        {
+            var input = Console.ReadLine();
+
+            if (input == "-Start")
+                break;
+
+            if (string.IsNullOrWhiteSpace(input))
+                continue;
+
+            _game.AddPlayer(new Player(input));
+            Console.WriteLine($"Player {input} added");
+        }
+
+        _game.StartGame();
+    }
+
+    private void GameActionRequested_Automated(object? source, ActionRequestArgs args)
     {
         Card cardToPlay = args.ValidCards.Skip(Random.Shared.Next(0, args.ValidCards.Count - 1)).First();
 
@@ -46,17 +61,17 @@ public class GameService : IHostedService
         _game.PlayCard(args.Player, cardToPlay);
     }
 
-    void GameActionRequested(object? source, ActionRequestArgs args)
+    private void GameActionRequested(object? source, ActionRequestArgs args)
     {
         var cardMap = args.ValidCards.Select((card, i) => new { card, idx = i }).ToDictionary(x => x.idx, x => x.card);
 
         Console.WriteLine();
         Console.WriteLine($"{args.Player.Name} is being asked for a card.");
         Console.WriteLine("They have:");
-        Console.WriteLine(string.Join(Environment.NewLine,
+        Console.WriteLine(string.Join("\n",
             args.Player.Hand.OrderBy(c => c.Suit).ThenBy(c => c.Rank).Select(c => $"\t{c}")));
         Console.WriteLine("They can play:");
-        Console.WriteLine(string.Join(Environment.NewLine, cardMap.Select(cm => $"\t{cm.Key} = {cm.Value}")));
+        Console.WriteLine(string.Join(string.Empty, cardMap.Select(cm => $"\t{cm.Key} = {cm.Value}\n")));
         Console.WriteLine();
         Console.WriteLine("Please input card to play");
 
@@ -73,26 +88,23 @@ public class GameService : IHostedService
         _game.PlayCard(args.Player, cardMap[cardKey]);
     }
 
-    void GameOnTrickCompleted(object? sender, EventArgs e)
+    private void GameOnTrickCompleted(object? sender, EventArgs e)
     {
-        Console.WriteLine($"Winner: {_game.CurrentRound!.CurrentTrick!.Winner!.Name}");
-        Console.WriteLine();
+        Console.WriteLine($"Winner: {_game.CurrentRound!.CurrentTrick!.Winner!.Name}\n");
     }
 
-    void GameCompleted(object? sender, EventArgs args)
+    private void GameCompleted(object? sender, EventArgs args)
     {
-        Console.WriteLine($"Winner: {_game.CurrentRound!.CurrentTrick!.Winner!.Name}");
-        Console.WriteLine();
+        Console.WriteLine($"Winner: {_game.CurrentRound!.CurrentTrick!.Winner!.Name}\n");
         Console.WriteLine("Game Over");
         Console.WriteLine("Final Scores:");
         foreach (Player player in _game.Players.OrderBy(p => p.Score))
             Console.WriteLine($"{player.Name}: {player.Score}");
     }
 
-    void OnRoundCompleted(object? sender, EventArgs eventArgs)
+    private void OnRoundCompleted(object? sender, EventArgs eventArgs)
     {
-        Console.WriteLine($"Winner: {_game.CurrentRound!.CurrentTrick!.Winner!.Name}");
-        Console.WriteLine();
+        Console.WriteLine($"Winner: {_game.CurrentRound!.CurrentTrick!.Winner!.Name}\n");
         Console.WriteLine("Round completed");
         Console.WriteLine("Scores:");
         foreach (Player player in _game.Players)

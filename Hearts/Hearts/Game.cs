@@ -1,12 +1,7 @@
 ﻿namespace Hearts;
 
-public class Game(int pointsToEndGame, IRoundFactory roundFactory, IDeck deck)
+public class Game(int pointsToEndGame, IRoundFactory roundFactory)
 {
-    public event ActionRequestedEventHandler? ActionRequested;
-    public event EventHandler? GameCompleted;
-    public event EventHandler? RoundCompleted;
-    public event EventHandler? TrickCompleted;
-    
     public Guid Id { get; set; } = Guid.NewGuid();
     public List<IRound> Rounds { get; } = [];
     public IRound? CurrentRound => Rounds.LastOrDefault();
@@ -16,10 +11,15 @@ public class Game(int pointsToEndGame, IRoundFactory roundFactory, IDeck deck)
     private readonly List<Player> _players = [];
     private bool _gameStarted;
 
+    public event ActionRequestedEventHandler? ActionRequested;
+    public event EventHandler? GameCompleted;
+    public event EventHandler? RoundCompleted;
+    public event EventHandler? TrickCompleted;
+
     public void AddPlayer(Player player)
     {
-        if (_players.Count == 4)
-            throw new InvalidOperationException("A game of hearts can only have 4 players.");
+        if (_players.Count == 8)
+            throw new InvalidOperationException("A game of hearts can only have 8 players.");
 
         if (_gameStarted)
             throw new InvalidOperationException("You cannot add a player to a game that has already started.");
@@ -32,8 +32,8 @@ public class Game(int pointsToEndGame, IRoundFactory roundFactory, IDeck deck)
         if (_gameStarted)
             throw new InvalidOperationException("The game has already started.");
 
-        if (_players.Count != 4)
-            throw new InvalidOperationException("A game of hearts must have exactly 4 players.");
+        if (_players.Count < 3)
+            throw new InvalidOperationException("A game of hearts must have at least 3 players.");
 
         _gameStarted = true;
 
@@ -66,14 +66,7 @@ public class Game(int pointsToEndGame, IRoundFactory roundFactory, IDeck deck)
         round.TrickCompleted += OnTrickCompleted;
         Rounds.Add(round);
 
-        DealCards();
-
-        round.StartTrick();
-    }
-
-    private void DealCards()
-    {
-        deck.DealShuffled(_players);
+        round.StartRound();
     }
 
     private void EndGame()

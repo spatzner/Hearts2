@@ -4,21 +4,33 @@ using Hearts;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 
-var builder = Host
+IHostBuilder builder = Host
    .CreateDefaultBuilder(args)
    .ConfigureServices((_, services) =>
     {
-        services.AddScoped<IDeck, Deck>();
+        services.AddScoped<IDeckFactory, DeckFactory>();
         services.AddScoped<ITrickFactory, TrickFactory>();
         services.AddScoped<IRoundFactory, RoundFactory>();
         services.AddScoped<Game>(provider =>
         {
-            int pointsToEndGame = 25;
+            var pointsToEndGame = 25;
             var roundFactory = provider.GetRequiredService<IRoundFactory>();
-            var deck = provider.GetRequiredService<IDeck>();
-            return new Game(pointsToEndGame, roundFactory, deck);
+            return new Game(pointsToEndGame, roundFactory);
         });
         services.AddHostedService<GameService>();
     });
 
 builder.Build().Run();
+
+public class DeckFactory : IDeckFactory
+{
+    public IDeck CreateDeck(int playerCount)
+    {
+        return new Deck(playerCount);
+    }
+}
+
+public interface IDeckFactory
+{
+    IDeck CreateDeck(int playerCount);
+}

@@ -6,8 +6,7 @@ public interface ITrick
     bool TrickComplete { get; }
     SortedDictionary<Player, Card> Cards { get; }
     int Points { get; }
-    void StartTrick();
-    bool PlayCard(Player player, Card card);
-    event ActionRequestedEventHandler? ActionRequested;
-    event EventHandler? TrickCompleted;
+    Suit? LeadingSuit { get; }
+    Player? CurrentPlayer { get; }
+    void PlayCard(Player player, Card card);
 }

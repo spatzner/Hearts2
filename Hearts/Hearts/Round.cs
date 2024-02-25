@@ -2,8 +2,10 @@
 
 namespace Hearts;
 
-public class Round(List<Player> players, ITrickFactory trickFactory) : IRound
+public class Round(List<Player> players, ITrickFactory trickFactory, IDeckFactory deckFactory) : IRound
 {
+    private readonly List<ITrick> _tricks = [];
+    private readonly IDeck _deck = deckFactory.CreateDeck(players.Count);
     public event EventHandler? RoundCompleted;
     public event EventHandler? TrickCompleted;
     public event ActionRequestedEventHandler? ActionRequested;
@@ -12,26 +14,19 @@ public class Round(List<Player> players, ITrickFactory trickFactory) : IRound
     public ITrick? CurrentTrick => _tricks.LastOrDefault();
     public bool HeartsBroken { get; set; }
 
-    private readonly List<ITrick> _tricks = [];
-
-    public void StartTrick()
+    public void StartRound()
     {
-        //Shouldn't matter in this case because flow should prevent event triggering on old tricks
-        //And also that the Trick doesn't have a longer lifespan tha the Round
-        //But it's a good practice to remove event handlers when they are no longer needed
-        if (CurrentTrick != null)
-        {
-            CurrentTrick.ActionRequested -= OnActionRequested;
-            CurrentTrick.TrickCompleted -= OnTrickCompleted;
-        }
+        _deck.DealShuffled(players);
+        StartTrick();
+    }
 
-        ITrick trick = trickFactory.CreateTrick(GetPlayerOrder(), HeartsBroken);
-        trick.ActionRequested += OnActionRequested;
-        trick.TrickCompleted += OnTrickCompleted;
+    private void StartTrick()
+    {
+        ITrick trick = trickFactory.CreateTrick(GetPlayerOrder());
 
         _tricks.Add(trick);
 
-        trick.StartTrick();
+        ActionRequested?.Invoke(this, GetActionRequest());
     }
 
     public void PlayCard(Player player, Card card)
@@ -39,18 +34,71 @@ public class Round(List<Player> players, ITrickFactory trickFactory) : IRound
         if (CurrentTrick == null || CurrentTrick.TrickComplete)
             throw new InvalidOperationException("You cannot play a card when there is no active trick.");
 
-        HeartsBroken = CurrentTrick.PlayCard(player, card);
+        if (!GetValidCardsToPlay().Contains(card))
+            throw new InvalidOperationException("You cannot play that card");
+
+        CurrentTrick.PlayCard(player, card);
+
+        if (card is { Suit: Suit.Hearts })
+            HeartsBroken = true;
+
+        if (CurrentTrick.TrickComplete)
+            CompleteTrick();
+        else
+            ActionRequested?.Invoke(this, GetActionRequest());
+    }
+
+    protected virtual void OnRoundCompleted()
+    {
+        ScoreRound();
+        RoundCompleted?.Invoke(this, EventArgs.Empty);
+    }
+
+    private ActionRequestArgs GetActionRequest()
+    {
+        return CurrentTrick!.CurrentPlayer == null
+            ? throw new InvalidOperationException("You cannot send an action request when there is no next player.")
+            : new ActionRequestArgs
+            {
+                CardsPlayed = [.. CurrentTrick.Cards.Values],
+                LeadingSuit = CurrentTrick!.LeadingSuit,
+                Player = CurrentTrick!.CurrentPlayer,
+                ValidCards = [.. GetValidCardsToPlay().OrderBy(x => x.Suit).ThenBy(x => x.Rank)]
+            };
+    }
+
+    private IEnumerable<Card> GetValidCardsToPlay()
+    {
+        var player = CurrentTrick?.CurrentPlayer
+         ?? throw new InvalidOperationException("You cannot get valid cards to play when there is no next player.");
+
+        if (Tricks.Count == 1 && CurrentTrick!.Cards.Count == 0)
+            return [_deck.StartingCard];
+
+        if (player.Hand.All(c => c.Suit == Suit.Hearts))
+            return player.Hand;
+
+        if (CurrentTrick!.Cards.Count == 0)
+            return player.Hand.Where(c => HeartsBroken || c.Suit != Suit.Hearts);
+
+        if (player.Hand.Any(c => c.Suit == CurrentTrick.LeadingSuit))
+            return player.Hand.Where(c => c.Suit == CurrentTrick.LeadingSuit);
+
+        if (HeartsBroken)
+            return player.Hand;
+
+        return player.Hand.Where(c => c.Suit != Suit.Hearts);
     }
 
     private List<Player> GetPlayerOrder()
     {
-        Player start = (CurrentTrick == null ? players.First(p => p.HasRoundStartCard()) : CurrentTrick.Winner)
+        Player start = (CurrentTrick == null ? players.First(p => p.Hand.Contains(_deck.StartingCard)) : CurrentTrick.Winner)
          ?? throw new InvalidOperationException();
 
         return players.SkipWhile(p => p != start).Concat(players.TakeWhile(p => p != start)).ToList();
     }
 
-    private void OnTrickCompleted(object? sender, EventArgs args)
+    private void CompleteTrick()
     {
         if (players.Any(p => p.Hand.Count == 0))
             OnRoundCompleted();
@@ -64,27 +112,20 @@ public class Round(List<Player> players, ITrickFactory trickFactory) : IRound
     private void ScoreRound()
     {
         if (PlayerShotTheMoon())
+        {
             foreach (Player player in players.Where(p => p != _tricks.First().Winner))
                 player.Score += _tricks.Sum(t => t.Points);
+        }
         else
+        {
             foreach (ITrick trick in _tricks)
                 trick.Winner!.Score += trick.Points;
+        }
     }
 
     private bool PlayerShotTheMoon()
     {
-        var pointedTricks = _tricks.Where(t => t.Points > 0);
+        var pointedTricks = _tricks.Where(t => t.Points > 0).ToList();
         return pointedTricks.All(x => x.Winner == pointedTricks.First().Winner);
-    }
-
-    protected virtual void OnRoundCompleted()
-    {
-        ScoreRound();
-        RoundCompleted?.Invoke(this, EventArgs.Empty);
-    }
-
-    protected virtual void OnActionRequested(object source, ActionRequestArgs args)
-    {
-        ActionRequested?.Invoke(source, args);
     }
 }

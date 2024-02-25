@@ -2,8 +2,8 @@
 
 public class TrickFactory : ITrickFactory
 {
-    public ITrick CreateTrick(List<Player> players, bool heartsBroken)
+    public ITrick CreateTrick(List<Player> players)
     {
-        return new Trick(players, heartsBroken);
+        return new Trick(players);
     }
 }

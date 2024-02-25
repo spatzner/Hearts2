@@ -59,21 +59,6 @@ public class PlayerTests
     }
 
     [TestMethod]
-    public void HasRoundStartCard_ReturnsTrueWhenHandContainsTwoOfClubs()
-    {
-        // Arrange
-        var player = new Player("Test");
-        var hand = new List<Card> { new(Suit.Clubs, Rank.Two), new(Suit.Diamonds, Rank.Three) };
-        player.DealHand(hand);
-
-        // Act
-        var result = player.HasRoundStartCard();
-
-        // Assert
-        Assert.IsTrue(result);
-    }
-
-    [TestMethod]
     public void TakePoints_AddsPointsToScore()
     {
         // Arrange

@@ -6,9 +6,9 @@ public class Player(string name) : IComparable
     public Guid Id { get; } = Guid.NewGuid();
     public IReadOnlyCollection<Card> Hand => HandInternal.AsReadOnly();
 
-    private List<Card> HandInternal { get; set; } = null!;
-
     public int Score { get; set; }
+
+    private List<Card> HandInternal { get; set; } = null!;
 
     public int CompareTo(object? obj)
     {
@@ -32,10 +32,5 @@ public class Player(string name) : IComparable
             throw new InvalidOperationException("You cannot play a card that you do not have.");
 
         HandInternal.Remove(card);
-    }
-
-    public bool HasRoundStartCard()
-    {
-        return Hand.Any(c => c is { Rank: Rank.Two, Suit: Suit.Clubs });
     }
 }

@@ -10,19 +10,33 @@ public class DeckTests
     {
         
         // Arrange & Act
-        var deck = new Deck();
+        var deck = new Deck(4);
         var player = new Player("Test");
         deck.DealShuffled([player]);
 
         // Assert
         Assert.AreEqual(52, player.Hand.Count);
     }
+    
+    [TestMethod]
+    public void Deck_Constructor_RemovesCardsToMakeEvenHands()
+    {
+
+        // Arrange & Act
+        var deck = new Deck(3);
+        List<Player> players = [new Player("Test1"), new Player("Test2"), new Player("Test3")];
+        deck.DealShuffled(players);
+
+        // Assert
+        Assert.AreEqual(players[0].Hand.Count, players[1].Hand.Count);
+        Assert.AreEqual(players[1].Hand.Count, players[2].Hand.Count);
+    }
 
     [TestMethod]
     public void Deck_Constructor_CreatesAllUniqueCards()
     {
         // Arrange & Act
-        var deck = new Deck();
+        var deck = new Deck(4);
         var player = new Player("Test");
         deck.DealShuffled([player]);
 
@@ -34,7 +48,7 @@ public class DeckTests
     public void DealShuffled_GivesEachPlayerUniqueCards()
     {
         // Arrange
-        var deck = new Deck();
+        var deck = new Deck(4);
         var players = new List<Player>
         {
             new("Bob"),
@@ -55,7 +69,7 @@ public class DeckTests
     public void DealShuffled_ShufflesCardsForEachCall()
     {
         // Arrange
-        var deck = new Deck();
+        var deck = new Deck(4);
         var players1 = new List<Player>
         {
             new("Bob"),
