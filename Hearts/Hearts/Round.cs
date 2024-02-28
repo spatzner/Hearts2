@@ -6,14 +6,14 @@ public class Round(List<Player> players, ITrickFactory trickFactory, IDeckFactor
 {
     private readonly IDeck _deck = deckFactory.CreateDeck(players.Count);
     private readonly List<ITrick> _tricks = [];
-    
-    public event EventHandler? RoundCompleted;
-    public event EventHandler? TrickCompleted;
-    public event ActionRequestedEventHandler? ActionRequested;
 
     public ReadOnlyCollection<ITrick> Tricks => _tricks.AsReadOnly();
     public ITrick? CurrentTrick => _tricks.LastOrDefault();
     public bool HeartsBroken { get; set; }
+
+    public event EventHandler? RoundCompleted;
+    public event EventHandler? TrickCompleted;
+    public event ActionRequestedEventHandler? ActionRequested;
 
     public void StartRound()
     {

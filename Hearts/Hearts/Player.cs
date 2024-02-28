@@ -4,11 +4,9 @@ public class Player(string name) : IComparable
 {
     public string Name { get; } = name;
     public Guid Id { get; } = Guid.NewGuid();
-    public IReadOnlyCollection<Card> Hand => HandInternal.AsReadOnly();
+    public IReadOnlyCollection<Card> Hand => _handInternal.AsReadOnly();
 
     public int Score { get; set; }
-
-    private List<Card> HandInternal { get; set; } = null!;
 
     public int CompareTo(object? obj)
     {
@@ -20,17 +18,20 @@ public class Player(string name) : IComparable
 
     public void DealHand(IEnumerable<Card> hand)
     {
-        HandInternal = hand.ToList();
+        _handInternal.Clear();
+        _handInternal.AddRange(hand);
     }
 
     public void PlayCard(Card card)
     {
-        if (HandInternal == null || HandInternal.Count == 0)
+        if (_handInternal == null || _handInternal.Count == 0)
             throw new InvalidOperationException("You cannot play a card when you have no cards.");
 
-        if (HandInternal.All(c => c != card))
+        if (_handInternal.All(c => c != card))
             throw new InvalidOperationException("You cannot play a card that you do not have.");
 
-        HandInternal.Remove(card);
+        _handInternal.Remove(card);
     }
+
+    private readonly List<Card> _handInternal = [];
 }

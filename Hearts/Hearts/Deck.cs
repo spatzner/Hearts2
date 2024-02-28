@@ -12,6 +12,8 @@ public class Deck : IDeck
 
     private List<Card> _cards;
 
+    public Card StartingCard { get; }
+
     public Deck(int playerCount)
     {
         _cards = [];
@@ -24,8 +26,6 @@ public class Deck : IDeck
 
         StartingCard = _cards.Where(c => c.Suit == Suit.Clubs).MinBy(c => c.Rank)!;
     }
-
-    public Card StartingCard { get; }
 
     public void DealShuffled(List<Player> players)
     {

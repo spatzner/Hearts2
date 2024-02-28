@@ -21,16 +21,3 @@ IHostBuilder builder = Host
     });
 
 builder.Build().Run();
-
-public class DeckFactory : IDeckFactory
-{
-    public IDeck CreateDeck(int playerCount)
-    {
-        return new Deck(playerCount);
-    }
-}
-
-public interface IDeckFactory
-{
-    IDeck CreateDeck(int playerCount);
-}
